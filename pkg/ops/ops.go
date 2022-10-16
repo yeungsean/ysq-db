@@ -18,4 +18,10 @@ const (
 	LT Type = "<"
 	// Like LIKE
 	Like Type = "LIKE"
+	// IsNull ...
+	IsNull Type = "IS NULL"
+	// IsNotNull ...
+	IsNotNull Type = "IS NOT NULL"
+	// In ...
+	In Type = "IN"
 )

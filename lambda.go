@@ -5,8 +5,8 @@ import (
 
 	"github.com/yeungsean/ysq-db/pkg"
 	"github.com/yeungsean/ysq-db/pkg/column"
-	"github.com/yeungsean/ysq-db/pkg/statments/join"
-	"github.com/yeungsean/ysq-db/pkg/statments/ops"
+	"github.com/yeungsean/ysq-db/pkg/join"
+	"github.com/yeungsean/ysq-db/pkg/ops"
 	"github.com/yeungsean/ysq/pkg/delegate"
 )
 

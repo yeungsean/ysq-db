@@ -10,4 +10,6 @@ const (
 	Right Type = "RIGHT"
 	// Inner 内连接
 	Inner Type = "INNER"
+	// Full 全连接
+	Full Type = "FULL"
 )
