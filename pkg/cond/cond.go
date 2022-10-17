@@ -52,17 +52,17 @@ func (c *Cond) String() string {
 	return sb.String()
 }
 
-// Or ...
+// Or 条件或
 func Or() *Cond {
 	return Any()
 }
 
-// And ...
+// And 条件与
 func And() *Cond {
 	return All()
 }
 
-// Any ...
+// Any 任何一个条件满足
 func Any() *Cond {
 	return &Cond{
 		ops:       make([]*column.Column, 0),
@@ -70,7 +70,7 @@ func Any() *Cond {
 	}
 }
 
-// All ...
+// All 所有条件满足
 func All() *Cond {
 	c := Any()
 	c.isAll = true
