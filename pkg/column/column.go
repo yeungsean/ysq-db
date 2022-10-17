@@ -18,7 +18,7 @@ type Column struct {
 	op    ops.Type
 }
 
-// New 实力化
+// New 实例化
 func New(name Type) *Column {
 	return &Column{
 		name: name,
