@@ -29,31 +29,26 @@ func (c *Cond) Add(col *column.Column) *Cond {
 
 // String ...
 func (c *Cond) String() string {
-	strs := ysq.Select(ysq.FromSlice(c.ops), func(c *column.Column) string {
-		str, _ := c.String()
-		return str
+	strs := ysq.FromSlice(c.ops).CastToStringBy(func(c *column.Column) string {
+		return c.String()
 	}).ToSlice(uint(len(c.ops)))
-
-	sb := strings.Builder{}
+	join := " OR "
 	if c.isAll {
-		sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, " AND ")))
-	} else {
-		sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, " OR ")))
+		join = " AND "
 	}
 
+	sb := strings.Builder{}
+	if len(c.ops) > 0 {
+		sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, join)))
+	}
 	if len(c.childCond) == 0 {
 		return sb.String()
 	}
 
-	sb.WriteString(" OR ")
-	strs = ysq.Select(ysq.FromSlice(c.childCond), func(c *Cond) string {
+	strs = ysq.FromSlice(c.childCond).CastToStringBy(func(c *Cond) string {
 		return c.String()
 	}).ToSlice(uint(len(c.childCond)))
-	if c.isAll {
-		sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, " AND ")))
-	} else {
-		sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, " OR ")))
-	}
+	sb.WriteString(fmt.Sprintf("(%s)", strings.Join(strs, join)))
 	return sb.String()
 }
 

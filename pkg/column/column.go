@@ -2,7 +2,9 @@ package column
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/yeungsean/ysq"
 	"github.com/yeungsean/ysq-db/pkg/ops"
 )
 
@@ -11,22 +13,35 @@ type Type string
 
 // Column 列
 type Column struct {
-	name       Type
-	value      interface{}
-	valueSlice []interface{}
-	op         ops.Type
+	name  Type
+	value interface{}
+	op    ops.Type
 }
 
 // New 实力化
 func New(name Type) *Column {
 	return &Column{
 		name: name,
+		op:   ops.EQ,
 	}
 }
 
 // String ...
-func (c Column) String() (string, interface{}) {
-	return fmt.Sprintf("%s=?", c.name), c.value
+func (c Column) String() string {
+	switch c.op {
+	case ops.IsNull, ops.IsNotNull:
+		return fmt.Sprintf(`%s %s`, c.name, c.op)
+	case ops.Like:
+		return fmt.Sprintf(`%s LIKE ?`, c.name)
+	case ops.In:
+		lst := c.value.([]interface{})
+		strs := ysq.FromSlice(lst).CastToStringBy(func(i interface{}) string {
+			return "?"
+		}).ToSlice(uint(len(lst)))
+		return fmt.Sprintf(`%s IN(%s)`, c.name, strings.Join(strs, ","))
+	default:
+		return fmt.Sprintf("%s%s?", c.name, c.op)
+	}
 }
 
 // Default ...
@@ -97,6 +112,6 @@ func (c *Column) IsNotNull() *Column {
 // In ...
 func (c *Column) In(vals ...interface{}) *Column {
 	c.op = ops.In
-	c.valueSlice = vals
+	c.value = vals
 	return c
 }
