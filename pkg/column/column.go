@@ -5,113 +5,179 @@ import (
 	"strings"
 
 	"github.com/yeungsean/ysq"
+	"github.com/yeungsean/ysq-db/pkg/alias"
+	"github.com/yeungsean/ysq-db/pkg/common"
+	"github.com/yeungsean/ysq-db/pkg/field"
 	"github.com/yeungsean/ysq-db/pkg/ops"
 )
 
-// Type 列类型
-type Type string
-
-// Column 列
+// Column 筛选列
 type Column struct {
-	name  Type
-	value interface{}
-	op    ops.Type
+	field.Field
+	isFilter     bool
+	value        any
+	defaultValue any
+	op           ops.Type
+}
+
+// Option 可选参数
+type Option func(*Column)
+
+// WithTable ...
+func WithTable(value string) Option {
+	return func(c *Column) {
+		c.Table = value
+	}
+}
+
+// WithValue ...
+func WithValue(value any) Option {
+	return func(c *Column) {
+		c.value = value
+	}
+}
+
+// WithDefaultValue ...
+func WithDefaultValue(value any) Option {
+	return func(c *Column) {
+		c.defaultValue = value
+	}
+}
+
+// WithOp ...
+func WithOp(op ops.Type) Option {
+	return func(c *Column) {
+		c.op = op
+	}
+}
+
+// WithAlias ...
+func WithAlias(a *alias.Alias) Option {
+	return func(c *Column) {
+		c.Alias = a
+	}
+}
+
+// WithIsFilter ...
+func WithIsFilter(filter bool) Option {
+	return func(c *Column) {
+		c.isFilter = filter
+	}
 }
 
 // New 实例化
-func New(name Type) *Column {
-	return &Column{
-		name: name,
-		op:   ops.EQ,
+func New(name field.Type, options ...Option) *Column {
+	column := &Column{
+		op:       ops.EQ,
+		isFilter: true,
 	}
+	column.Name = name
+	common.OptionForEach(column, options)
+	return column
+}
+
+// NewField 实例化字段
+func NewField(name field.Type, options ...Option) *Column {
+	column := New(name, options...)
+	column.isFilter = false
+	return column
 }
 
 // String ...
 func (c Column) String() string {
+	if !c.isFilter {
+		return c.GetName()
+	}
+
 	switch c.op {
 	case ops.IsNull, ops.IsNotNull:
-		return fmt.Sprintf(`%s %s`, c.name, c.op)
+		return fmt.Sprintf(`(%s %s)`, c.GetName(), c.op)
 	case ops.Like:
-		return fmt.Sprintf(`%s LIKE ?`, c.name)
+		return fmt.Sprintf(`(%s LIKE ?)`, c.GetName())
 	case ops.In:
-		lst := c.value.([]interface{})
-		strs := ysq.FromSlice(lst).CastToStringBy(func(i interface{}) string {
+		lst := c.value.([]any)
+		strs := ysq.FromSlice(lst).CastToStringBy(func(interface{}) string {
 			return "?"
-		}).ToSlice(uint(len(lst)))
-		return fmt.Sprintf(`%s IN(%s)`, c.name, strings.Join(strs, ","))
+		}).ToSlice(len(lst))
+		return fmt.Sprintf(`(%s IN(%s))`, c.GetName(), strings.Join(strs, ","))
 	default:
-		return fmt.Sprintf("%s%s?", c.name, c.op)
+		return fmt.Sprintf("(%s%s?)", c.GetName(), c.op)
 	}
 }
 
+// GetName ...
+func (c *Column) GetName() string {
+	field := c.Field.SelectField()
+	if !c.isFilter && c.defaultValue != nil {
+		return fmt.Sprintf(`IFNULL(%s,%s)`, field, c.defaultValue)
+	}
+	return field
+}
+
 // Default ...
-func (c *Column) Default(val interface{}) *Column {
-	c.value = val
+func (c *Column) Default(val any) *Column {
+	c.defaultValue = val
 	return c
 }
 
-func (c *Column) set(value interface{}, op ops.Type) {
+// Set ...
+func (c *Column) Set(value any, op ops.Type) *Column {
 	c.value = value
 	c.op = op
+	c.isFilter = true
+	return c
 }
 
 // Equal =
-func (c *Column) Equal(val interface{}) *Column {
-	c.set(val, ops.EQ)
-	return c
+func (c *Column) Equal(value any) *Column {
+	return c.Set(value, ops.EQ)
 }
 
 // NotEqual <>
-func (c *Column) NotEqual(val interface{}) *Column {
-	c.set(val, ops.NEQ)
-	return c
+func (c *Column) NotEqual(value any) *Column {
+	return c.Set(value, ops.NEQ)
 }
 
 // GreaterThan >
-func (c *Column) GreaterThan(val interface{}) *Column {
-	c.set(val, ops.GT)
-	return c
+func (c *Column) GreaterThan(value any) *Column {
+	return c.Set(value, ops.GT)
 }
 
 // LessThan <
-func (c *Column) LessThan(val interface{}) *Column {
-	c.set(val, ops.LT)
-	return c
+func (c *Column) LessThan(value any) *Column {
+	return c.Set(value, ops.LT)
 }
 
 // GreaterEqual >=
-func (c *Column) GreaterEqual(val interface{}) *Column {
-	c.set(val, ops.GTE)
-	return c
+func (c *Column) GreaterEqual(value any) *Column {
+	return c.Set(value, ops.GTE)
 }
 
 // LessEqual <=
-func (c *Column) LessEqual(val interface{}) *Column {
-	c.set(val, ops.LTE)
-	return c
+func (c *Column) LessEqual(value any) *Column {
+	return c.Set(value, ops.LTE)
 }
 
 // Like ...
-func (c *Column) Like(val interface{}) *Column {
-	c.set(val, ops.Like)
-	return c
+func (c *Column) Like(value any) *Column {
+	return c.Set(value, ops.Like)
 }
 
 // IsNull 是否为空
 func (c *Column) IsNull() *Column {
 	c.op = ops.IsNull
+	c.isFilter = true
 	return c
 }
 
 // IsNotNull 不为空
 func (c *Column) IsNotNull() *Column {
 	c.op = ops.IsNotNull
+	c.isFilter = true
 	return c
 }
 
 // In ...
-func (c *Column) In(vals ...interface{}) *Column {
-	c.op = ops.In
-	c.value = vals
-	return c
+func (c *Column) In(values ...any) *Column {
+	return c.Set(values, ops.In)
 }
