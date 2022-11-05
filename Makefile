@@ -18,3 +18,6 @@ PKG = github.com/yeungsean/ysq-db/pkg
 vet:
 	@$(GO) vet ./...
 
+mod:
+	@$(GO) mod tidy
+	git diff --exit-code go.mod
