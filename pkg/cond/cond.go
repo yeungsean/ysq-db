@@ -7,6 +7,7 @@ import (
 	"github.com/yeungsean/ysq"
 	"github.com/yeungsean/ysq-db/pkg/column"
 	"github.com/yeungsean/ysq-db/pkg/common"
+	"github.com/yeungsean/ysq-db/pkg/ops"
 )
 
 // LogicType 逻辑类型
@@ -52,13 +53,24 @@ func (c *Cond) AddChildren(others ...*Cond) *Cond {
 }
 
 // Add ...
-func (c *Cond) Add(column *column.Column, lts ...LogicType) *Cond {
+func (c *Cond) Add(col *column.Column, lts ...LogicType) *Cond {
 	lt := common.VarArgGetFirst(lts...)
-	c.ops = append(c.ops, &CondColumn{Column: column, LogicType: lt})
+	c.ops = append(c.ops, &CondColumn{Column: col, LogicType: lt})
 	return c
 }
 
-// StringLine ...
+// Add2 ...
+func (c *Cond) Add2(col1, col2 *column.Column, ot ops.Type, lts ...LogicType) *Cond {
+	lt := common.VarArgGetFirst(lts...)
+	col1.Set(col2, ot)
+	c.ops = append(c.ops, &CondColumn{
+		Column:    col1,
+		LogicType: lt,
+	})
+	return c
+}
+
+// stringLine ...
 func (c *Cond) stringLine() string {
 	sb := strings.Builder{}
 	if len(c.ops) == 0 {

@@ -20,19 +20,28 @@ func TestAnd(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	func() {
-		cond := All().Add(column.New("column1")).Add(column.New("column2"))
-		assert.Equal(t, "(column1=? AND column2=?)", cond.String())
+		cond := All().
+			Add(column.New("column1")).
+			Add(column.New("column2"))
+		assert.Equal(t, "((column1=?) AND (column2=?))", cond.String())
 	}()
 
 	func() {
-		cond := Any().Add(column.New("column1")).Add(column.New("column2"))
-		assert.Equal(t, "(column1=? OR column2=?)", cond.String())
+		cond := Any().
+			Add(column.New("column1")).
+			Add(column.New("column2"))
+		assert.Equal(t, "((column1=?) OR (column2=?))", cond.String())
 	}()
 
 	func() {
-		condOr := Any().Add(column.New("or_col1").GreaterEqual(1)).Add(column.New("or_col2").LessEqual(2))
-		condAnd := All().Add(column.New("and_col1").IsNull()).Add(column.New("and_col2").IsNotNull())
+		condOr := Any().
+			Add(column.New("or_col1").GreaterEqual(1)).
+			Add(column.New("or_col2").LessEqual(2))
+		condAnd := All().
+			Add(column.New("and_col1").IsNull()).
+			Add(column.New("and_col2").IsNotNull())
 		cond := Any().AddChildren(condAnd).AddChildren(condOr)
-		assert.Equal(t, `((and_col1 IS NULL AND and_col2 IS NOT NULL) OR (or_col1>=? OR or_col2<=?))`, cond.String())
+		assert.Equal(t, `(((and_col1 IS NULL) AND (and_col2 IS NOT NULL)) OR ((or_col1>=?) OR (or_col2<=?)))`,
+			cond.String())
 	}()
 }

@@ -14,19 +14,18 @@ import (
 // Column 筛选列
 type Column struct {
 	field.Field
-	isFilter     bool
-	value        any
-	defaultValue any
-	op           ops.Type
+	isFilter bool
+	value    any
+	op       ops.Type
 }
 
 // Option 可选参数
 type Option func(*Column)
 
-// WithTable ...
-func WithTable(value string) Option {
+// WithPrefix 前缀
+func WithPrefix(value string) Option {
 	return func(c *Column) {
-		c.Table = value
+		c.Prefix = value
 	}
 }
 
@@ -37,13 +36,6 @@ func WithValue(value any) Option {
 	}
 }
 
-// WithDefaultValue ...
-func WithDefaultValue(value any) Option {
-	return func(c *Column) {
-		c.defaultValue = value
-	}
-}
-
 // WithOp ...
 func WithOp(op ops.Type) Option {
 	return func(c *Column) {
@@ -51,7 +43,7 @@ func WithOp(op ops.Type) Option {
 	}
 }
 
-// WithAlias ...
+// WithAlias 别名
 func WithAlias(a *alias.Alias) Option {
 	return func(c *Column) {
 		c.Alias = a
@@ -91,33 +83,30 @@ func (c Column) String() string {
 
 	switch c.op {
 	case ops.IsNull, ops.IsNotNull:
-		return fmt.Sprintf(`(%s %s)`, c.GetName(), c.op)
+		return fmt.Sprintf(`%s %s`, c.GetName(), c.op)
 	case ops.Like:
-		return fmt.Sprintf(`(%s LIKE ?)`, c.GetName())
+		return fmt.Sprintf(`%s LIKE ?`, c.GetName())
 	case ops.In:
 		lst := c.value.([]any)
-		strs := ysq.FromSlice(lst).CastToStringBy(func(interface{}) string {
-			return "?"
-		}).ToSlice(len(lst))
-		return fmt.Sprintf(`(%s IN(%s))`, c.GetName(), strings.Join(strs, ","))
+		strs := ysq.FromSlice(lst).
+			CastToStringBy(func(any) string { return "?" }).
+			ToSlice(len(lst))
+		return fmt.Sprintf(`%s IN(%s)`, c.GetName(), strings.Join(strs, ","))
 	default:
-		return fmt.Sprintf("(%s%s?)", c.GetName(), c.op)
+		if tmp, ok := c.value.(*Column); ok {
+			return fmt.Sprintf("%s%s%s", c.GetName(), c.op, tmp.GetName())
+		}
+		return fmt.Sprintf("%s%s?", c.GetName(), c.op)
 	}
 }
 
 // GetName ...
 func (c *Column) GetName() string {
 	field := c.Field.SelectField()
-	if !c.isFilter && c.defaultValue != nil {
-		return fmt.Sprintf(`IFNULL(%s,%s)`, field, c.defaultValue)
+	if !c.isFilter && c.DefaultValue != nil {
+		return fmt.Sprintf(`IFNULL(%s,%s)`, field, c.DefaultValue)
 	}
 	return field
-}
-
-// Default ...
-func (c *Column) Default(val any) *Column {
-	c.defaultValue = val
-	return c
 }
 
 // Set ...

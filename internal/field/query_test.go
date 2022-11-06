@@ -28,7 +28,7 @@ func (t myEntity) String() string {
 }
 
 func Test_QueryString(t *testing.T) {
-	q := NewQuery(myEntity{}).
+	q := NewQuery(myEntity{}, WithAlias[myEntity]("u")).
 		Select("col1", "col2").
 		Equal("col1", "good").
 		GreaterOrEqual("col2", "very").
@@ -40,16 +40,18 @@ func Test_QueryString(t *testing.T) {
 			OrderDesc("col2").
 			String()
 		assert.Equal(t,
-			`SELECT col1,col2 FROM entity_table WHERE (col1=?) AND (col2>=?) OR (col1=?) AND (col1 IS NOT NULL) ORDER BY col1 ASC,col2 ASC`,
+			`SELECT col1,col2 FROM entity_table AS u WHERE (col1=?) AND (col2>=?) OR (col1=?) AND (col1 IS NOT NULL) ORDER BY col1 ASC,col2 DESC`,
 			ustr)
+		assert.Equal(t, []interface{}{"good", "very", "boy"}, q.Values())
 	}()
 
-	//	func() {
-	//		ustr := q.Equal("col3", "halou", cond.Or).Equal("col4", "louha", cond.Or).String()
-	//		assert.Equal(t,
-	//			`SELECT col1,col2 FROM entity_table WHERE (col1=?) AND (col2>=?) OR (col1=?) OR (col3=?) OR (col4=?)`,
-	//			ustr)
-	//	}()
+	func() {
+		ustr := q.Equal("col3", "halou", cond.Or).Equal("col4", "louha", cond.Or).String()
+		assert.Equal(t,
+			`SELECT col1,col2 FROM entity_table AS u WHERE (col1=?) AND (col2>=?) OR (col1=?) OR (col3=?) OR (col4=?)`,
+			ustr)
+		assert.Equal(t, []interface{}{"good", "very", "boy", "halou", "louha"}, q.Values())
+	}()
 }
 
 func Test_String(t *testing.T) {
