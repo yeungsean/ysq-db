@@ -18,12 +18,10 @@ func columnTypeToOrderDesc(t field.Type) *order.Order {
 // OrderAsc ORDER BY $COLUMN ASC
 func (q *Query[T]) OrderAsc(cols ...field.Type) *Query[T] {
 	return q.wrap(
-		func(q *Query[T], lc *queryContext[T]) func() statement.Type {
+		func(q *Query[T], lc *queryContext[T]) statement.Type {
 			fields := ysq.Select(ysq.FromSlice(cols), columnTypeToOrder).ToSlice(len(cols))
 			lc.orders = append(lc.orders, fields...)
-			return func() statement.Type {
-				return statement.Sort
-			}
+			return statement.Sort
 		},
 	)
 }
@@ -31,12 +29,10 @@ func (q *Query[T]) OrderAsc(cols ...field.Type) *Query[T] {
 // OrderDesc ORDER BY $COLUMN DESC
 func (q *Query[T]) OrderDesc(cols ...field.Type) *Query[T] {
 	return q.wrap(
-		func(q *Query[T], lc *queryContext[T]) func() statement.Type {
+		func(q *Query[T], lc *queryContext[T]) statement.Type {
 			fields := ysq.Select(ysq.FromSlice(cols), columnTypeToOrderDesc).ToSlice(len(cols))
 			lc.orders = append(lc.orders, fields...)
-			return func() statement.Type {
-				return statement.Sort
-			}
+			return statement.Sort
 		},
 	)
 }

@@ -25,7 +25,7 @@ type (
 		Fields       []*field.Field
 		Groups       []*column.Column
 		orders       []*order.Order
-		tables       []tableExpr[T]
+		mainTable    tableExpr[T]
 		joins        []joinExpr[T]
 
 		LimitOffset int
@@ -39,25 +39,40 @@ type (
 	}
 
 	// Iterator 迭代器
-	Iterator[T string] func() statement.Type
+	Iterator[T string] statement.Type
 
 	// Query ...
 	Query[T string] struct {
 		ctx      context.Context
 		buildCnt int32
-		Next     func() Iterator[T]
+		Next     func() statement.Type
 	}
 )
 
-func statementWhere() statement.Type {
-	return statement.Where
+func newQueryContext[T string]() *queryContext[T] {
+	qc := &queryContext[T]{
+		WhereClause:  cond.Linear(),
+		HavingClause: cond.Linear(),
+		Fields:       make([]*field.Field, 0, 1),
+		Groups:       make([]*column.Column, 0),
+		orders:       make([]*order.Order, 0),
+		Values:       make([]any, 0, 1),
+		joins:        make([]joinExpr[T], 0),
+		mainTable:    tableExpr[T]{},
+	}
+	return qc
 }
 
 // NewQuery ...
 func NewQuery[T string]() *Query[T] {
-	return &Query[T]{
+	q := &Query[T]{
 		ctx: context.TODO(),
 	}
+	q.Next = func() statement.Type {
+		q.ctx = context.WithValue(q.ctx, ctxKeyLambda, newQueryContext())
+		return statement.Nop
+	}
+	return q
 }
 
 // Context ...
@@ -68,23 +83,30 @@ func (q *Query[T]) Context(ctx context.Context) *Query[T] {
 
 // Entity ...
 func (q *Query[T]) Entity(e T, aliasOpt ...string) *Query[T] {
-	alias := common.VarArgGetFirst(aliasOpt...)
-	ctx := q.ctxGetLambda()
-	if alias != "" {
-		ctx.tables = append(ctx.tables, tableExpr[T]{table: e, alias: alias})
-	} else {
-		ctx.tables = append(ctx.tables, tableExpr[T]{table: e})
+	nextQ := &Query[T]{}
+	nextQ.Next = func() statement.Type {
+		q.Next()
+		alias := common.VarArgGetFirst(aliasOpt...)
+		lctx := q.ctxGetLambda()
+		if alias != "" {
+			lctx.mainTable.table = e
+			lctx.mainTable.alias = alias
+		} else {
+			lctx.mainTable.table = e
+		}
+		nextQ.ctx = context.WithValue(q.ctx, ctxKeyLambda, lctx)
+		return statement.Table
 	}
-	return q
+	return nextQ
 }
 
 func (q *Query[T]) ctxGetLambda() *queryContext[T] {
 	return q.ctx.Value(ctxKeyLambda).(*queryContext[T])
 }
 
-func (q *Query[T]) wrap(f func(*Query[T], *queryContext[T]) func() statement.Type) *Query[T] {
+func (q *Query[T]) wrap(f func(*Query[T], *queryContext[T]) statement.Type) *Query[T] {
 	nextQ := &Query[T]{}
-	nextQ.Next = func() Iterator[T] {
+	nextQ.Next = func() statement.Type {
 		q.Next()
 		lctx := q.ctxGetLambda()
 		f1 := f(q, lctx)
