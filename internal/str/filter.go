@@ -9,10 +9,10 @@ import (
 	"github.com/yeungsean/ysq-db/pkg/statement"
 )
 
-func (q *Query[T]) wrapStatementWhere(f func(*Query[T], *queryContext[T]) *column.Column,
+func (q *Query[T]) wrapStatementWhere(f func() *column.Column,
 	value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrap(func(iq *Query[T], lc *queryContext[T]) statement.Type {
-		col := f(iq, lc)
+		col := f()
 		lt := common.VarArgGetFirst(lts...)
 		lc.WhereClause.Add(col, lt)
 		lc.Values = append(lc.Values, value)
@@ -23,7 +23,7 @@ func (q *Query[T]) wrapStatementWhere(f func(*Query[T], *queryContext[T]) *colum
 // Equal =
 func (q *Query[T]) Equal(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.EQ),
@@ -35,7 +35,7 @@ func (q *Query[T]) Equal(f field.Type, value any, lts ...cond.LogicType) *Query[
 // NotEqual <>
 func (q *Query[T]) NotEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.NEQ),
@@ -47,7 +47,7 @@ func (q *Query[T]) NotEqual(f field.Type, value any, lts ...cond.LogicType) *Que
 // Greater >
 func (q *Query[T]) Greater(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.GT),
@@ -59,7 +59,7 @@ func (q *Query[T]) Greater(f field.Type, value any, lts ...cond.LogicType) *Quer
 // GreaterOrEqual >=
 func (q *Query[T]) GreaterOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.GTE),
@@ -71,7 +71,7 @@ func (q *Query[T]) GreaterOrEqual(f field.Type, value any, lts ...cond.LogicType
 // Less <
 func (q *Query[T]) Less(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.LT),
@@ -83,7 +83,7 @@ func (q *Query[T]) Less(f field.Type, value any, lts ...cond.LogicType) *Query[T
 // LessOrEqual <=
 func (q *Query[T]) LessOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrapStatementWhere(
-		func(q *Query[T], qc *queryContext[T]) *column.Column {
+		func() *column.Column {
 			return column.New(f,
 				column.WithValue(value),
 				column.WithOp(ops.LTE),
