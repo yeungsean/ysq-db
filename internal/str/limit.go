@@ -1,6 +1,6 @@
 package str
 
-import "github.com/yeungsean/ysq-db/pkg/statement"
+import "github.com/yeungsean/ysq-db/internal/expr/statement"
 
 // Limit ...
 func (q *Query[T]) Limit(limit int) *Query[T] {

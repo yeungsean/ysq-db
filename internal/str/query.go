@@ -3,36 +3,14 @@ package str
 import (
 	"context"
 
-	"github.com/yeungsean/ysq-db/pkg/column"
-	"github.com/yeungsean/ysq-db/pkg/common"
-	"github.com/yeungsean/ysq-db/pkg/cond"
-	"github.com/yeungsean/ysq-db/pkg/field"
-	"github.com/yeungsean/ysq-db/pkg/order"
-	"github.com/yeungsean/ysq-db/pkg/statement"
-)
-
-type ctxKey uint8
-
-const (
-	ctxKeyLambda ctxKey = iota
+	"github.com/yeungsean/ysq-db/internal"
+	"github.com/yeungsean/ysq-db/internal/expr/common"
+	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/internal/provider"
+	"github.com/yeungsean/ysq-db/internal/provider/mysql"
 )
 
 type (
-	queryContext[T string] struct {
-		HasForUpdate bool
-		WhereClause  *cond.Cond
-		HavingClause *cond.Cond
-		Fields       []*field.Field
-		Groups       []*column.Column
-		orders       []*order.Order
-		mainTable    tableExpr[T]
-		joins        []joinExpr[T]
-
-		LimitOffset int
-		LimitCount  int
-		Values      []any
-	}
-
 	// Iterable ...
 	Iterable[T string] interface {
 		Next() Iterator[T]
@@ -49,30 +27,34 @@ type (
 	}
 )
 
-func newQueryContext[T string]() *queryContext[T] {
-	qc := &queryContext[T]{
-		WhereClause:  cond.Linear(),
-		HavingClause: cond.Linear(),
-		Fields:       make([]*field.Field, 0, 1),
-		Groups:       make([]*column.Column, 0),
-		orders:       make([]*order.Order, 0),
-		Values:       make([]any, 0, 1),
-		joins:        make([]joinExpr[T], 0),
-		mainTable:    tableExpr[T]{},
-	}
-	return qc
-}
-
 // NewQuery ...
-func NewQuery[T string]() *Query[T] {
+func NewQuery[T string](e ...T) *Query[T] {
 	q := &Query[T]{
 		ctx: context.TODO(),
 	}
+	q.ctx = context.WithValue(q.ctx, internal.CtxKeySourceProvider, &mysql.Provider{})
 	q.Next = func() statement.Type {
-		q.ctx = context.WithValue(q.ctx, ctxKeyLambda, newQueryContext())
+		lctx := newQueryContext()
+		if len(e) > 0 {
+			lctx.mainTable.Table = string(e[0])
+		}
+		q.ctx = context.WithValue(q.ctx, internal.CtxKeyLambda, lctx)
 		return statement.Nop
 	}
 	return q
+}
+
+// As 别名
+func (q *Query[T]) As(alias string) *Query[T] {
+	nextQ := &Query[T]{}
+	nextQ.Next = func() statement.Type {
+		q.Next()
+		lctx := q.ctxGetLambda()
+		lctx.mainTable.Alias = alias
+		nextQ.ctx = q.ctx
+		return statement.Table
+	}
+	return nextQ
 }
 
 // Context ...
@@ -89,19 +71,24 @@ func (q *Query[T]) Entity(e T, aliasOpt ...string) *Query[T] {
 		alias := common.VarArgGetFirst(aliasOpt...)
 		lctx := q.ctxGetLambda()
 		if alias != "" {
-			lctx.mainTable.table = e
-			lctx.mainTable.alias = alias
+			lctx.mainTable.Table = e
+			lctx.mainTable.Alias = alias
 		} else {
-			lctx.mainTable.table = e
+			lctx.mainTable.Table = e
 		}
-		nextQ.ctx = context.WithValue(q.ctx, ctxKeyLambda, lctx)
+		nextQ.ctx = q.ctx
+		// nextQ.ctx = context.WithValue(q.ctx, internal.CtxKeyLambda, lctx)
 		return statement.Table
 	}
 	return nextQ
 }
 
 func (q *Query[T]) ctxGetLambda() *queryContext[T] {
-	return q.ctx.Value(ctxKeyLambda).(*queryContext[T])
+	return q.ctx.Value(internal.CtxKeyLambda).(*queryContext[T])
+}
+
+func (q *Query[T]) ctxGetProvider() provider.IProvider {
+	return q.ctx.Value(internal.CtxKeySourceProvider).(provider.IProvider)
 }
 
 func (q *Query[T]) wrap(f func(*Query[T], *queryContext[T]) statement.Type) *Query[T] {
@@ -110,7 +97,8 @@ func (q *Query[T]) wrap(f func(*Query[T], *queryContext[T]) statement.Type) *Que
 		q.Next()
 		lctx := q.ctxGetLambda()
 		f1 := f(q, lctx)
-		nextQ.ctx = context.WithValue(q.ctx, ctxKeyLambda, lctx)
+		nextQ.ctx = q.ctx
+		// nextQ.ctx = context.WithValue(q.ctx, internal.CtxKeyLambda, lctx)
 		return f1
 	}
 	return nextQ

@@ -6,9 +6,8 @@ import (
 	"sync/atomic"
 
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/pkg/column"
-	"github.com/yeungsean/ysq-db/pkg/field"
-	"github.com/yeungsean/ysq-db/pkg/order"
+	"github.com/yeungsean/ysq-db/internal"
+	"github.com/yeungsean/ysq-db/internal/expr/order"
 )
 
 func (q *Query[T]) build() {
@@ -26,44 +25,44 @@ func (q *Query[T]) Values() []any {
 // String ...
 func (q *Query[T]) String() string {
 	q.build()
-	qlCtx := q.ctxGetLambda()
-	fields := ysq.FromSlice(qlCtx.Fields).
-		CastToStringBy(func(c *field.Field) string { return c.SelectField() }).
-		ToSlice(len(qlCtx.Fields))
-	sb := strings.Builder{}
-	fieldStr := strings.Join(fields, ",")
-	if fieldStr == "" {
+	qlCtx, provider := q.ctxGetLambda(), q.ctxGetProvider()
+	q.ctx = internal.CtxResetFilterColumnIndex(q.ctx)
+	var fieldStr string
+	if len(qlCtx.Fields) > 0 {
+		fields := provider.SelectFieldsQuote(qlCtx.Fields...)
+		fieldStr = strings.Join(fields, ",")
+	} else {
 		fieldStr = "*"
 	}
+
+	sb := strings.Builder{}
 	sb.Grow(13 + len(fieldStr))
 	sb.WriteString("SELECT ")
 	sb.WriteString(fieldStr)
 	sb.WriteString(" FROM ")
-	sb.WriteString(qlCtx.mainTable.String())
+	sb.WriteString(qlCtx.mainTable.String(q.ctx))
 
 	if len(qlCtx.joins) > 0 {
 		for _, join := range qlCtx.joins {
-			sb.WriteString(join.String())
+			sb.WriteString(join.String(q.ctx))
 		}
 	}
 
-	if wStr := qlCtx.WhereClause.String(); wStr != "" {
+	if wStr := qlCtx.WhereClause.String(q.ctx); wStr != "" {
 		sb.Grow(7 + len(wStr))
 		sb.WriteString(" WHERE ")
 		sb.WriteString(wStr)
 	}
 
 	if len(qlCtx.Groups) > 0 {
-		groupFields := ysq.FromSlice(qlCtx.Groups).
-			CastToStringBy(func(c *column.Column) string { return c.String() }).
-			ToSlice(len(qlCtx.Groups))
+		groupFields := provider.OtherTypeFieldsQuote(qlCtx.Groups...)
 		tmp := strings.Join(groupFields, ",")
 		sb.Grow(10 + len(tmp))
 		sb.WriteString(" GROUP BY ")
 		sb.WriteString(tmp)
 	}
 
-	if hStr := qlCtx.HavingClause.String(); hStr != "" {
+	if hStr := qlCtx.HavingClause.String(q.ctx); hStr != "" {
 		sb.Grow(8 + len(hStr))
 		sb.WriteString(" HAVING ")
 		sb.WriteString(hStr)
@@ -71,7 +70,7 @@ func (q *Query[T]) String() string {
 
 	if len(qlCtx.orders) > 0 {
 		orderFields := ysq.FromSlice(qlCtx.orders).
-			CastToStringBy(func(c *order.Order) string { return c.String() }).
+			CastToStringBy(func(c *order.Order) string { return c.String(q.ctx) }).
 			ToSlice(len(qlCtx.orders))
 		tmp := strings.Join(orderFields, ",")
 		sb.Grow(10 + len(tmp))
@@ -86,5 +85,10 @@ func (q *Query[T]) String() string {
 	if qlCtx.LimitOffset > 0 {
 		sb.WriteString(fmt.Sprintf(" OFFSET %d", qlCtx.LimitOffset))
 	}
+
+	if qlCtx.HasForUpdate {
+		sb.WriteString(" FOR UPDATE")
+	}
+
 	return sb.String()
 }
