@@ -19,7 +19,8 @@ type Expr[T string] struct {
 func (j Expr[T]) String(ctx context.Context) string {
 	sb := strings.Builder{}
 	tb := j.Expr.String(ctx)
-	sb.Grow(len(tb) + 10 + len(j.Condition) + len(j.Type))
+	sb.Grow(len(tb) + 11 + len(j.Condition) + len(j.Type))
+	sb.WriteString(" ")
 	sb.WriteString(string(j.Type))
 	sb.WriteString(" JOIN ")
 	sb.WriteString(tb)

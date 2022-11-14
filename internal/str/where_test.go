@@ -15,7 +15,7 @@ import (
 
 func TestIn(t *testing.T) {
 	vals := []any{1, 2, 3}
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").In("id", vals)
+	q := NewQuery(`user`).Field("name").In("id", vals)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -35,7 +35,7 @@ func TestIn(t *testing.T) {
 
 func TestNotIn(t *testing.T) {
 	vals := []any{1}
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").NotIn("id", vals)
+	q := NewQuery(`user`).Field("name").NotIn("id", vals)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -55,7 +55,7 @@ func TestNotIn(t *testing.T) {
 
 func TestEqual(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Equal("id", val)
+	q := NewQuery(`user`).Field("name").Equal("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -75,7 +75,7 @@ func TestEqual(t *testing.T) {
 
 func TestNotEqual(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").NotEqual("id", val)
+	q := NewQuery(`user`).Field("name").NotEqual("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -95,7 +95,7 @@ func TestNotEqual(t *testing.T) {
 
 func TestGreater(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Greater("id", val)
+	q := NewQuery(`user`).Field("name").Greater("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -115,7 +115,7 @@ func TestGreater(t *testing.T) {
 
 func TestGreaterOrEqual(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").GreaterOrEqual("id", val)
+	q := NewQuery(`user`).Field("name").GreaterOrEqual("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -135,7 +135,7 @@ func TestGreaterOrEqual(t *testing.T) {
 
 func TestLess(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Less("id", val)
+	q := NewQuery(`user`).Field("name").Less("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -155,7 +155,7 @@ func TestLess(t *testing.T) {
 
 func TestLessOrEqual(t *testing.T) {
 	val := 1
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").LessOrEqual("id", val)
+	q := NewQuery(`user`).Field("name").LessOrEqual("id", val)
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -174,7 +174,7 @@ func TestLessOrEqual(t *testing.T) {
 }
 
 func TestIsNull(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").IsNull("id")
+	q := NewQuery(`user`).Field("name").IsNull("id")
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -193,7 +193,7 @@ func TestIsNull(t *testing.T) {
 }
 
 func TestIsNotNull(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").IsNotNull("id")
+	q := NewQuery(`user`).Field("name").IsNotNull("id")
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -212,7 +212,7 @@ func TestIsNotNull(t *testing.T) {
 }
 
 func TestLike(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Like("name", "ysl")
+	q := NewQuery(`user`).Field("name").Like("name", "ysl")
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
@@ -231,7 +231,7 @@ func TestLike(t *testing.T) {
 }
 
 func TestWhere(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Where(
+	q := NewQuery(`user`).Field("name").Where(
 		cond.All().AddChildren(
 			cond.All().
 				Add(column.New("id", column.WithValue(1))).
@@ -260,7 +260,7 @@ func TestWhere(t *testing.T) {
 }
 
 func TestBetween(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").Between("id", 1, 10)
+	q := NewQuery(`user`).Field("name").Between("id", 1, 10)
 	q.build()
 	qCtx := q.ctxGetLambda()
 
@@ -280,7 +280,7 @@ func TestBetween(t *testing.T) {
 }
 
 func TestNotBetween(t *testing.T) {
-	q := NewQuery(`user`).FieldWihtoutPrefix("name", "").NotBetween("id", 1, 10)
+	q := NewQuery(`user`).Field("name").NotBetween("id", 1, 10)
 	q.build()
 	qCtx := q.ctxGetLambda()
 

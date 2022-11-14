@@ -5,9 +5,9 @@ import (
 	"github.com/yeungsean/ysq-db/internal/expr/column"
 	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/cond"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 // GroupBy 分组

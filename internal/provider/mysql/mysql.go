@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/provider"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 // Provider mysql
@@ -18,7 +18,7 @@ func (m Provider) PlaceHolder(int) string {
 
 // DefaultValue 默认值
 func (m Provider) DefaultValue(field, value string) string {
-	return fmt.Sprintf(`IFNULL(%s,%s)`, field, value)
+	return fmt.Sprintf(`IFNULL(%s,%s) AS %[1]s`, field, value)
 }
 
 // SelectFieldsQuote 包起来
@@ -30,7 +30,7 @@ func (m Provider) SelectFieldsQuote(fields ...*field.Field) []string {
 func (m Provider) SelectFieldQuote(field *field.Field) string {
 	c := provider.SelectFieldQuote(field, "`%s`")
 	if field.DefaultValue != nil {
-		c = fmt.Sprintf("IFNULL(%s,%s)", c, field.DefaultValue)
+		c = fmt.Sprintf("IFNULL(%s,%v)", c, field.DefaultValue)
 	}
 
 	if field.Alias != "" {

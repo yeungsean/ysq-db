@@ -3,7 +3,7 @@ package provider
 import (
 	"fmt"
 
-	"github.com/yeungsean/ysq-db/internal/expr/field"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 // IProvider ...

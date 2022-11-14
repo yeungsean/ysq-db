@@ -42,3 +42,10 @@ func WithAggregation(agg aggregation.Type) Option {
 		c.agg = agg
 	}
 }
+
+// WithAlias ...
+func WithAlias(alias string) Option {
+	return func(c *FieldOption) {
+		c.Alias = alias
+	}
+}

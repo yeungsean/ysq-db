@@ -25,14 +25,14 @@ func TestLeftjoinExprString(t *testing.T) {
 	func() {
 		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
 		assert.Equal(t,
-			"LEFT JOIN `user_detail` AS ud ON u.id = ud.user_id",
+			" LEFT JOIN `user_detail` AS ud ON u.id = ud.user_id",
 			je.String(ctx))
 	}()
 
 	func() {
 		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
 		assert.Equal(t,
-			`LEFT JOIN "user_detail" AS ud ON u.id = ud.user_id`,
+			` LEFT JOIN "user_detail" AS ud ON u.id = ud.user_id`,
 			je.String(ctx))
 	}()
 }
@@ -49,7 +49,7 @@ func TestRightjoinExprString(t *testing.T) {
 
 	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
 	assert.Equal(t,
-		"RIGHT JOIN `user_detail` AS ud ON u.id = ud.user_id",
+		" RIGHT JOIN `user_detail` AS ud ON u.id = ud.user_id",
 		je.String(ctx))
 }
 
@@ -64,7 +64,7 @@ func TestInnerjoinExprString(t *testing.T) {
 
 	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
 	assert.Equal(t,
-		"INNER JOIN `user_detail` ON u.id = user_id",
+		" INNER JOIN `user_detail` ON u.id = user_id",
 		je.String(ctx))
 }
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 func TestSum(t *testing.T) {

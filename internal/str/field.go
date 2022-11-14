@@ -2,8 +2,8 @@ package str
 
 import (
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 // Select ...
@@ -41,21 +41,19 @@ func (q *Query[T]) SelectPrefix(prefix string, fields ...string) *Query[T] {
 }
 
 // Field ...
-func (q *Query[T]) Field(prefix, fieldName, defaultValue string) *Query[T] {
+func (q *Query[T]) Field(fieldName string, opts ...field.Option) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {
-			qc.Fields = append(qc.Fields, &field.Field{
+			f := &field.Field{
 				Name: field.Type(fieldName),
-				FieldOption: field.FieldOption{
-					DefaultValue: defaultValue,
-					Prefix:       prefix,
-				},
-			})
+			}
+			for _, opt := range opts {
+				opt(&f.FieldOption)
+			}
+			if f.Alias == "" {
+				f.Alias = fieldName
+			}
+			qc.Fields = append(qc.Fields, f)
 			return statement.Column
 		})
-}
-
-// FieldWihtoutPrefix ...
-func (q *Query[T]) FieldWihtoutPrefix(fieldName, defaultValue string) *Query[T] {
-	return q.Field("", fieldName, defaultValue)
 }

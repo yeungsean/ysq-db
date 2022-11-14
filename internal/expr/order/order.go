@@ -6,7 +6,7 @@ import (
 
 	"github.com/yeungsean/ysq-db/internal"
 	"github.com/yeungsean/ysq-db/internal/expr/common"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 // Type 排序类型

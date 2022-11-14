@@ -2,10 +2,10 @@ package str
 
 import (
 	"github.com/yeungsean/ysq-db/internal/expr/cond"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/join"
 	"github.com/yeungsean/ysq-db/internal/expr/order"
 	"github.com/yeungsean/ysq-db/internal/expr/table"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 type queryContext[T string] struct {

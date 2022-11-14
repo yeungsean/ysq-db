@@ -2,9 +2,9 @@ package str
 
 import (
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/order"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 func columnTypeToOrder(t field.Type) *order.Order {

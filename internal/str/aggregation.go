@@ -2,8 +2,8 @@ package str
 
 import (
 	"github.com/yeungsean/ysq-db/internal/expr/aggregation"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
 func (q *Query[T]) agg(fn aggregation.Type, f string, opts ...field.FieldOption) *Query[T] {

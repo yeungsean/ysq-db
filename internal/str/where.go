@@ -1,18 +1,20 @@
 package str
 
 import (
+	"strings"
+
 	"github.com/yeungsean/ysq-db/internal/expr/column"
 	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/cond"
-	"github.com/yeungsean/ysq-db/internal/expr/field"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
+	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
-func (q *Query[T]) wrapStatementWhere(f func() *column.Column,
-	value any, lts ...cond.LogicType) *Query[T] {
+func (q *Query[T]) wrapStatementWhere(f func(f field.Type, value any, op ops.Type) *column.Column,
+	ft field.Type, op ops.Type, value any, lts ...cond.LogicType) *Query[T] {
 	return q.wrap(func(iq *Query[T], qc *queryContext[T]) statement.Type {
-		col := f()
+		col := f(ft, value, op)
 		lt := common.VarArgGetFirst(lts...)
 		qc.WhereClause.Add(col, lt)
 		if _, ok := value.(*column.Column); !ok {
@@ -48,76 +50,49 @@ func (q *Query[T]) NotIn(f field.Type, value []any, lts ...cond.LogicType) *Quer
 	})
 }
 
+func buildColumn(f field.Type, value any, op ops.Type) *column.Column {
+	str := string(f)
+	opts := make([]column.Option, 0, 3)
+	opts = append(opts,
+		column.WithValue(value),
+		column.WithOp(op),
+	)
+	if idx := strings.Index(str, "."); idx > -1 {
+		prefix := str[0:idx]
+		opts = append(opts, column.WithPrefix(prefix))
+		f = field.Type(str[idx+1:])
+	}
+	return column.New(f, opts...)
+}
+
 // Equal =
 func (q *Query[T]) Equal(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.EQ),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.EQ, value, lts...)
 }
 
 // NotEqual <>
 func (q *Query[T]) NotEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.NEQ),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.NEQ, value, lts...)
 }
 
 // Greater >
 func (q *Query[T]) Greater(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.GT),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.GT, value, lts...)
 }
 
 // GreaterOrEqual >=
 func (q *Query[T]) GreaterOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.GTE),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.GTE, value, lts...)
 }
 
 // Less <
 func (q *Query[T]) Less(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.LT),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.LT, value, lts...)
 }
 
 // LessOrEqual <=
 func (q *Query[T]) LessOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(
-		func() *column.Column {
-			return column.New(f,
-				column.WithValue(value),
-				column.WithOp(ops.LTE),
-			)
-		}, value, lts...,
-	)
+	return q.wrapStatementWhere(buildColumn, f, ops.LTE, value, lts...)
 }
 
 // IsNull 是否为null
