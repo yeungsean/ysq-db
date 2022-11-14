@@ -28,10 +28,7 @@ func (q *Query[T]) wrapStatementWhere(f func(f field.Type, value any, op ops.Typ
 func (q *Query[T]) In(f field.Type, value []any, lts ...cond.LogicType) *Query[T] {
 	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
 		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(f,
-			column.WithValue(value),
-			column.WithOp(ops.In),
-		), lt)
+		qc.WhereClause.Add(buildColumn(f, value, ops.In), lt)
 		qc.Values = append(qc.Values, value...)
 		return statement.Where
 	})
@@ -41,10 +38,7 @@ func (q *Query[T]) In(f field.Type, value []any, lts ...cond.LogicType) *Query[T
 func (q *Query[T]) NotIn(f field.Type, value []any, lts ...cond.LogicType) *Query[T] {
 	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
 		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(f,
-			column.WithValue(value),
-			column.WithOp(ops.NotIn),
-		), lt)
+		qc.WhereClause.Add(buildColumn(f, value, ops.NotIn), lt)
 		qc.Values = append(qc.Values, value...)
 		return statement.Where
 	})
