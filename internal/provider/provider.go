@@ -25,18 +25,24 @@ type IProvider interface {
 }
 
 // SelectFieldQuote ...
-func SelectFieldQuote(f *field.Field, quoteFmt string) string {
+func SelectFieldQuote(f *field.Field, quoteFmt string) (c string) {
 	if f.Prefix == "" {
-		if !f.GetAggregation().IsNone() {
-			return fmt.Sprintf("%s(%s)", f.GetAggregation(), f.Name)
+		if f.Quote {
+			c = fmt.Sprintf(quoteFmt, f.Name)
 		} else {
-			return fmt.Sprintf(quoteFmt, f.Name)
+			c = string(f.Name)
+		}
+
+		if f.GetAggregation().IsNone() {
+			return
+		} else {
+			return fmt.Sprintf("%s(%s)", f.GetAggregation(), c)
 		}
 	} else {
-		if !f.GetAggregation().IsNone() {
-			return fmt.Sprintf("%s(%s.%s)", f.GetAggregation(), f.Prefix, f.Name)
-		} else {
+		if f.GetAggregation().IsNone() {
 			return fmt.Sprintf("%s.%s", f.Prefix, f.Name)
+		} else {
+			return fmt.Sprintf("%s(%s.%s)", f.GetAggregation(), f.Prefix, f.Name)
 		}
 	}
 }

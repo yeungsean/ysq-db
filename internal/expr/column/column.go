@@ -22,6 +22,17 @@ type Column struct {
 // Option 可选参数
 type Option func(*Column)
 
+// WithQuote 带引号
+func WithQuote(qs ...bool) Option {
+	return func(c *Column) {
+		q := true
+		if len(qs) > 0 {
+			q = false
+		}
+		c.Quote = q
+	}
+}
+
 // WithPrefix 前缀
 func WithPrefix(value string) Option {
 	return func(c *Column) {
@@ -57,12 +68,16 @@ func New(name field.Type, options ...Option) *Column {
 	}
 	column.Name = name
 	common.OptionForEach(column, options)
-	return column
-}
+	if column.Prefix != "" {
+		return column
+	}
 
-// NewField 实例化字段
-func NewField(name field.Type, options ...Option) *Column {
-	return New(name, options...)
+	ft := field.New(name)
+	column.Field.Alias = ft.Alias
+	column.Field.Prefix = ft.Prefix
+	column.Field.Name = ft.Name
+	column.Field.SetAggregation(ft.GetAggregation())
+	return column
 }
 
 // String ...

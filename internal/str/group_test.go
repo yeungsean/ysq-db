@@ -27,7 +27,7 @@ func TestHavingOrMySQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, "`gender`=?", qCtx.HavingClause.String(ctx))
+		assert.Equal(t, "gender=?", qCtx.HavingClause.String(ctx))
 	}()
 
 	func() {
@@ -35,7 +35,7 @@ func TestHavingOrMySQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1).HavingOr("id", 100, ops.GTE)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, "`gender`=? OR `id`>=?", qCtx.HavingClause.String(ctx))
+		assert.Equal(t, "gender=? OR id>=?", qCtx.HavingClause.String(ctx))
 	}()
 }
 
@@ -46,7 +46,7 @@ func TestHavingAndMySQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, "`gender`=?", qCtx.HavingClause.String(ctx))
+		assert.Equal(t, "gender=?", qCtx.HavingClause.String(ctx))
 	}()
 
 	func() {
@@ -54,7 +54,7 @@ func TestHavingAndMySQL(t *testing.T) {
 		q := NewQuery(`user`).HavingAnd("gender", 1).HavingAnd("id", 100, ops.GTE)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, "`gender`=? AND `id`>=?", qCtx.HavingClause.String(ctx))
+		assert.Equal(t, "gender=? AND id>=?", qCtx.HavingClause.String(ctx))
 	}()
 }
 
@@ -65,7 +65,7 @@ func TestHavingOrPostgreSQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, `"gender"=$1`, qCtx.HavingClause.String(ctx))
+		assert.Equal(t, `gender=$1`, qCtx.HavingClause.String(ctx))
 	}()
 
 	func() {
@@ -73,7 +73,7 @@ func TestHavingOrPostgreSQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1).HavingOr("id", 100, ops.GTE)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, `"gender"=$1 OR "id">=$2`, qCtx.HavingClause.String(ctx))
+		assert.Equal(t, `gender=$1 OR id>=$2`, qCtx.HavingClause.String(ctx))
 	}()
 }
 
@@ -84,7 +84,7 @@ func TestHavingAndPostgreSQL(t *testing.T) {
 		q := NewQuery(`user`).HavingOr("gender", 1)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, `"gender"=$1`, qCtx.HavingClause.String(ctx))
+		assert.Equal(t, `gender=$1`, qCtx.HavingClause.String(ctx))
 	}()
 
 	func() {
@@ -92,6 +92,6 @@ func TestHavingAndPostgreSQL(t *testing.T) {
 		q := NewQuery(`user`).HavingAnd("gender", 1).HavingAnd("id", 100, ops.GTE)
 		q.build()
 		qCtx := q.ctxGetLambda()
-		assert.Equal(t, `"gender"=$1 AND "id">=$2`, qCtx.HavingClause.String(ctx))
+		assert.Equal(t, `gender=$1 AND id>=$2`, qCtx.HavingClause.String(ctx))
 	}()
 }

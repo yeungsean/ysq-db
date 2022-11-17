@@ -13,22 +13,22 @@ import (
 
 func TestFieldMySQL(t *testing.T) {
 	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
-	q := NewQuery(`user`).Field("id", field.WithDefaultValue(0))
+	q := NewQuery(`user`).Field("id", field.WithDefaultValue(0), field.WithAlias("id"))
 	q.build()
 	qCtx := q.ctxGetLambda()
 	strs := internal.CtxGetSourceProvider(ctx).SelectFieldsQuote(qCtx.Fields...)
 	assert.Len(t, strs, 1)
-	assert.Equal(t, []string{"IFNULL(`id`,0) AS id"}, strs)
+	assert.Equal(t, []string{"IFNULL(id,0) AS id"}, strs)
 }
 
 func TestFieldPostgreSQL(t *testing.T) {
 	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
-	q := NewQuery(`user`).Field("id", field.WithDefaultValue(11))
+	q := NewQuery(`user`).Field("id", field.WithDefaultValue(11), field.WithAlias("id"))
 	q.build()
 	qCtx := q.ctxGetLambda()
 	strs := internal.CtxGetSourceProvider(ctx).SelectFieldsQuote(qCtx.Fields...)
 	assert.Len(t, strs, 1)
-	assert.Equal(t, []string{`COALESCE("id",11) AS id`}, strs)
+	assert.Equal(t, []string{`COALESCE(id,11) AS id`}, strs)
 }
 
 func TestSelectPrefix(t *testing.T) {
@@ -61,7 +61,7 @@ func TestSelect(t *testing.T) {
 		qCtx := q.ctxGetLambda()
 		strs := internal.CtxGetSourceProvider(ctx).SelectFieldsQuote(qCtx.Fields...)
 		assert.Len(t, strs, 3)
-		assert.Equal(t, []string{"`id`", "`name`", "`gender`"}, strs)
+		assert.Equal(t, []string{"id", "name", "gender"}, strs)
 	}()
 
 	func() {
@@ -71,6 +71,6 @@ func TestSelect(t *testing.T) {
 		qCtx := q.ctxGetLambda()
 		strs := internal.CtxGetSourceProvider(ctx).SelectFieldsQuote(qCtx.Fields...)
 		assert.Len(t, strs, 3)
-		assert.Equal(t, []string{`"id"`, `"name"`, `"gender"`}, strs)
+		assert.Equal(t, []string{`id`, `name`, `gender`}, strs)
 	}()
 }

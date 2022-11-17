@@ -27,8 +27,8 @@ func (m Provider) SelectFieldsQuote(fields ...*field.Field) []string {
 }
 
 // SelectFieldQuote 包起来
-func (m Provider) SelectFieldQuote(field *field.Field) string {
-	c := provider.SelectFieldQuote(field, "`%s`")
+func (m Provider) SelectFieldQuote(field *field.Field) (c string) {
+	c = provider.SelectFieldQuote(field, "`%s`")
 	if field.DefaultValue != nil {
 		c = fmt.Sprintf("IFNULL(%s,%v)", c, field.DefaultValue)
 	}
@@ -45,13 +45,20 @@ func (m Provider) OtherTypeFieldsQuote(fields ...*field.Field) []string {
 }
 
 // OtherTypeFieldQuote ...
-func (m Provider) OtherTypeFieldQuote(field *field.Field) string {
+func (m Provider) OtherTypeFieldQuote(field *field.Field) (c string) {
+	defer func() {
+		if !field.GetAggregation().IsNone() {
+			c = fmt.Sprintf(`%s(%s)`, field.GetAggregation(), c)
+		}
+	}()
 	if field.Alias != "" {
 		return field.Alias
 	} else if field.Prefix != "" {
 		return fmt.Sprintf("%s.%s", field.Prefix, field.Name)
-	} else {
+	} else if field.Quote {
 		return m.Quote(string(field.Name))
+	} else {
+		return string(field.Name)
 	}
 }
 

@@ -50,8 +50,10 @@ func (m Provider) OtherTypeFieldQuote(field *field.Field) string {
 		return field.Alias
 	} else if field.Prefix != "" {
 		return fmt.Sprintf("%s.%s", field.Prefix, field.Name)
-	} else {
+	} else if field.Quote {
 		return m.Quote(string(field.Name))
+	} else {
+		return string(field.Name)
 	}
 }
 

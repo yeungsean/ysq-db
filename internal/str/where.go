@@ -1,137 +1,178 @@
 package str
 
 import (
-	"strings"
-
 	"github.com/yeungsean/ysq-db/internal/expr/column"
-	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/cond"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
 	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
-func (q *Query[T]) wrapStatementWhere(f func(f field.Type, value any, op ops.Type) *column.Column,
-	ft field.Type, op ops.Type, value any, lts ...cond.LogicType) *Query[T] {
+func (q *Query[T]) wrapStatementWhere(ft field.Type, op ops.Type, value any, lt cond.LogicType,
+	opts ...column.Option) *Query[T] {
 	return q.wrap(func(iq *Query[T], qc *queryContext[T]) statement.Type {
-		col := f(ft, value, op)
-		lt := common.VarArgGetFirst(lts...)
+		col := buildColumn(ft, value, op, opts...)
 		qc.WhereClause.Add(col, lt)
-		if _, ok := value.(*column.Column); !ok {
+		if value == nil {
+			return statement.Where
+		}
+		switch v := value.(type) {
+		case []any:
+			qc.Values = append(qc.Values, v...)
+		case *column.Column:
+		case *Query[T]:
+			panic("Unsupport")
+		default:
 			qc.Values = append(qc.Values, value)
 		}
 		return statement.Where
 	})
 }
 
-// In ...
-func (q *Query[T]) In(f field.Type, value []any, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(buildColumn(f, value, ops.In), lt)
-		qc.Values = append(qc.Values, value...)
-		return statement.Where
-	})
+func (q *Query[T]) wrapStatementWhereAnd(f field.Type, op ops.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhere(f, op, value, cond.And, opts...)
 }
 
-// NotIn ...
-func (q *Query[T]) NotIn(f field.Type, value []any, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(buildColumn(f, value, ops.NotIn), lt)
-		qc.Values = append(qc.Values, value...)
-		return statement.Where
-	})
+func (q *Query[T]) wrapStatementWhereOr(f field.Type, op ops.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhere(f, op, value, cond.Or, opts...)
 }
 
-func buildColumn(f field.Type, value any, op ops.Type) *column.Column {
-	str := string(f)
-	opts := make([]column.Option, 0, 3)
-	opts = append(opts,
-		column.WithValue(value),
-		column.WithOp(op),
-	)
-	if idx := strings.Index(str, "."); idx > -1 {
-		prefix := str[0:idx]
-		opts = append(opts, column.WithPrefix(prefix))
-		f = field.Type(str[idx+1:])
+// AndIn ...
+func (q *Query[T]) AndIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.In, value, opts...)
+}
+
+// OrIn ...
+func (q *Query[T]) OrIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.In, value, opts...)
+}
+
+// AndNotIn ...
+func (q *Query[T]) AndNotIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.NotIn, value, opts...)
+}
+
+// OrNotIn ...
+func (q *Query[T]) OrNotIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.NotIn, value, opts...)
+}
+
+func buildColumn(f field.Type, value any, op ops.Type, opts ...column.Option) *column.Column {
+	opts = append(opts, column.WithOp(op))
+	if op != ops.IsNull && op != ops.IsNotNull {
+		opts = append(opts, column.WithValue(value))
 	}
 	return column.New(f, opts...)
 }
 
-// Equal =
-func (q *Query[T]) Equal(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.EQ, value, lts...)
+// AndEqual =
+func (q *Query[T]) AndEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.EQ, value, opts...)
 }
 
-// NotEqual <>
-func (q *Query[T]) NotEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.NEQ, value, lts...)
+// OrEqual =
+func (q *Query[T]) OrEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.EQ, value, opts...)
 }
 
-// Greater >
-func (q *Query[T]) Greater(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.GT, value, lts...)
+// AndNotEqual <>
+func (q *Query[T]) AndNotEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.NEQ, value, opts...)
 }
 
-// GreaterOrEqual >=
-func (q *Query[T]) GreaterOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.GTE, value, lts...)
+// OrNotEqual <>
+func (q *Query[T]) OrNotEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.NEQ, value, opts...)
 }
 
-// Less <
-func (q *Query[T]) Less(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.LT, value, lts...)
+// AndGreater >
+func (q *Query[T]) AndGreater(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.GT, value, opts...)
 }
 
-// LessOrEqual <=
-func (q *Query[T]) LessOrEqual(f field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrapStatementWhere(buildColumn, f, ops.LTE, value, lts...)
+// OrGreater >
+func (q *Query[T]) OrGreater(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.GT, value, opts...)
 }
 
-// IsNull 是否为null
-func (q *Query[T]) IsNull(col field.Type, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(col).IsNull(), lt)
-		return statement.Where
-	})
+// AndGreaterOrEqual >=
+func (q *Query[T]) AndGreaterOrEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.GTE, value, opts...)
 }
 
-// IsNotNull 是否为not null
-func (q *Query[T]) IsNotNull(col field.Type, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(col).IsNotNull(), lt)
-		return statement.Where
-	})
+// OrGreaterOrEqual >=
+func (q *Query[T]) OrGreaterOrEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.GTE, value, opts...)
 }
 
-// Like ...
-func (q *Query[T]) Like(col field.Type, value any, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(col).Like(value), lt)
-		return statement.Where
-	})
+// AndLess <
+func (q *Query[T]) AndLess(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.LT, value, opts...)
 }
 
-// Between ...
-func (q *Query[T]) Between(col field.Type, min, max any, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(col).Between(min, max), lt)
-		return statement.Where
-	})
+// OrLess <
+func (q *Query[T]) OrLess(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.LT, value, opts...)
 }
 
-// NotBetween ...
-func (q *Query[T]) NotBetween(col field.Type, min, max any, lts ...cond.LogicType) *Query[T] {
-	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
-		lt := common.VarArgGetFirst(lts...)
-		qc.WhereClause.Add(column.New(col).NotBetween(min, max), lt)
-		return statement.Where
-	})
+// AndLessOrEqual <=
+func (q *Query[T]) AndLessOrEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.LTE, value, opts...)
+}
+
+// OrLessOrEqual <=
+func (q *Query[T]) OrLessOrEqual(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.LTE, value, opts...)
+}
+
+// AndIsNull 是否为null
+func (q *Query[T]) AndIsNull(f field.Type, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.IsNull, nil, opts...)
+}
+
+// OrIsNull 是否为null
+func (q *Query[T]) OrIsNull(f field.Type, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.IsNull, nil, opts...)
+}
+
+// AndIsNotNull 是否为not null
+func (q *Query[T]) AndIsNotNull(f field.Type, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.IsNotNull, nil, opts...)
+}
+
+// OrIsNotNull 是否为not null
+func (q *Query[T]) OrIsNotNull(f field.Type, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.IsNotNull, nil, opts...)
+}
+
+// AndLike AND LIKE ..
+func (q *Query[T]) AndLike(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.Like, value, opts...)
+}
+
+// OrLike OR LIKE ..
+func (q *Query[T]) OrLike(f field.Type, value any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.Like, value, opts...)
+}
+
+// AndBetween AND BETWEEN .. AND ..
+func (q *Query[T]) AndBetween(f field.Type, min, max any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.Between, []any{min, max}, opts...)
+}
+
+// OrBetween OR BETWEEN .. AND ..
+func (q *Query[T]) OrBetween(f field.Type, min, max any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.Between, []any{min, max}, opts...)
+}
+
+// AndNotBetween AND NOT BETWEEN .. AND ..
+func (q *Query[T]) AndNotBetween(f field.Type, min, max any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereAnd(f, ops.NotBetween, []any{min, max}, opts...)
+}
+
+// OrNotBetween OR NOT BETWEEN .. AND ..
+func (q *Query[T]) OrNotBetween(f field.Type, min, max any, opts ...column.Option) *Query[T] {
+	return q.wrapStatementWhereOr(f, ops.NotBetween, []any{min, max}, opts...)
 }
 
 // Where ...
