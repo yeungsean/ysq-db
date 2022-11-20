@@ -11,7 +11,7 @@ import (
 )
 
 func TestOrderAscMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
 		q := NewQuery().Entity("user").OrderAsc("id")
 		q.build()
@@ -29,7 +29,7 @@ func TestOrderAscMySQL(t *testing.T) {
 }
 
 func TestOrderDescMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
 		q := NewQuery().Entity("user").OrderDesc("id")
 		q.build()
@@ -47,7 +47,7 @@ func TestOrderDescMySQL(t *testing.T) {
 }
 
 func TestOrderAscPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
 		q := NewQuery().Entity("user").OrderAsc("id")
 		q.build()
@@ -65,7 +65,7 @@ func TestOrderAscPostgreSQL(t *testing.T) {
 }
 
 func TestOrderDescPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
 		q := NewQuery().Entity("user").OrderDesc("id")
 		q.build()

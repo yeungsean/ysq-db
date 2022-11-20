@@ -10,18 +10,16 @@ import (
 type IProvider interface {
 	// PlaceHolder 占位符
 	PlaceHolder(int) string
-	// DefaultValue 默认值的sql
-	DefaultValue(field, value string) string
 	// Quote ...
 	Quote(string) string
-	// SelectFieldsQuote 包起来
-	SelectFieldsQuote(...*field.Field) []string
-	// SelectFieldQuote 包起来
-	SelectFieldQuote(*field.Field) string
-	// OtherTypeFieldsQuote ...
-	OtherTypeFieldsQuote(...*field.Field) []string
-	// OtherTypeFieldQuote ...
-	OtherTypeFieldQuote(*field.Field) string
+	// SelectFields 包起来
+	SelectFields(...*field.Field) []string
+	// SelectField 包起来
+	SelectField(*field.Field) string
+	// OtherTypeFields ...
+	OtherTypeFields(...*field.Field) []string
+	// OtherTypeField ...
+	OtherTypeField(*field.Field) string
 }
 
 // SelectFieldQuote ...
@@ -44,5 +42,28 @@ func SelectFieldQuote(f *field.Field, quoteFmt string) (c string) {
 		} else {
 			return fmt.Sprintf("%s(%s.%s)", f.GetAggregation(), f.Prefix, f.Name)
 		}
+	}
+}
+
+// OtherTypeField ...
+func OtherTypeField(field *field.Field, quoteFn func(*field.Field) string) (c string) {
+	defer func() {
+		if !field.GetAggregation().IsNone() {
+			if field.Alias == "" {
+				c = fmt.Sprintf(`%s(%s)`, field.GetAggregation(), c)
+			} else {
+				c = fmt.Sprintf(`%s(%s) AS %s`, field.GetAggregation(), c, field.Alias)
+			}
+		}
+	}()
+	switch {
+	case field.Alias != "":
+		return field.Alias
+	case field.Prefix != "":
+		return fmt.Sprintf("%s.%s", field.Prefix, field.Name)
+	case field.Quote:
+		return quoteFn(field)
+	default:
+		return string(field.Name)
 	}
 }

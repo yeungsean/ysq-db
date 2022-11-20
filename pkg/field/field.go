@@ -3,8 +3,8 @@ package field
 import (
 	"strings"
 
-	"github.com/yeungsean/ysq-db/pkg"
 	"github.com/yeungsean/ysq-db/pkg/aggregation"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 // Type 列类型
@@ -12,7 +12,7 @@ type Type string
 
 // Option ...
 type Option struct {
-	pkg.Option
+	option.Option
 	Prefix       string
 	DefaultValue any
 	agg          aggregation.Type

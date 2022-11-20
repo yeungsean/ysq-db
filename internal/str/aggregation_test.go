@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yeungsean/ysq-db/pkg"
 	"github.com/yeungsean/ysq-db/pkg/field"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 func TestSum(t *testing.T) {
@@ -30,7 +30,7 @@ func TestAvg(t *testing.T) {
 	func() {
 		q := NewQuery(`user`).Avg("age", field.Option{
 			DefaultValue: "0",
-			Option: pkg.Option{
+			Option: option.Option{
 				Alias: "AvgAge",
 			},
 		})
@@ -88,7 +88,7 @@ func TestMin(t *testing.T) {
 func TestCount(t *testing.T) {
 	func() {
 		q := NewQuery(`user`).Count(field.Option{
-			Option: pkg.Option{Alias: "cnt"},
+			Option: option.Option{Alias: "cnt"},
 		})
 		q.build()
 		qCtx := q.ctxGetLambda()

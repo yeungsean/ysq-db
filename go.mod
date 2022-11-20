@@ -3,6 +3,7 @@ module github.com/yeungsean/ysq-db
 go 1.19
 
 require (
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.8.1
 	github.com/yeungsean/ysq v1.0.1
 )

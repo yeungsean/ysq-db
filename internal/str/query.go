@@ -3,12 +3,12 @@ package str
 import (
 	"context"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
 	"github.com/yeungsean/ysq-db/internal/provider"
 	"github.com/yeungsean/ysq-db/internal/provider/mysql"
-	"github.com/yeungsean/ysq-db/pkg"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 type (
@@ -33,7 +33,7 @@ func NewQuery[T string](e ...T) *Query[T] {
 	q := &Query[T]{
 		ctx: context.TODO(),
 	}
-	q.ctx = context.WithValue(q.ctx, internal.CtxKeySourceProvider, &mysql.Provider{})
+	q.ctx = context.WithValue(q.ctx, internal.CtxKeyDBProvider, &mysql.Provider{})
 	q.Next = func() statement.Type {
 		lctx := newQueryContext()
 		if len(e) > 0 {
@@ -58,19 +58,30 @@ func (q *Query[T]) As(alias string) *Query[T] {
 	return nextQ
 }
 
-// Context ...
+// Context 绑定自定义context
 func (q *Query[T]) Context(ctx context.Context) *Query[T] {
 	q.ctx = ctx
 	return q
 }
 
+// WithTx 使用事务
+func (q *Query[T]) WithTx(tx *sqlx.Tx) *Query[T] {
+	q.ctx = context.WithValue(q.ctx, internal.CtxKeyTx, tx)
+	return q
+}
+
+// WithDBProvider ...
+func (q *Query[T]) WithDBProvider(p provider.IProvider) *Query[T] {
+	return q
+}
+
 // Entity ...
-func (q *Query[T]) Entity(e T, opts ...pkg.Options) *Query[T] {
+func (q *Query[T]) Entity(e T, opts ...option.Options) *Query[T] {
 	nextQ := &Query[T]{}
 	nextQ.Next = func() statement.Type {
 		q.Next()
-		var opt pkg.Option
-		common.OptionForEach(&opt, opts)
+		var opt option.Option
+		option.ForEach(&opt, opts)
 		lctx := q.ctxGetLambda()
 		lctx.mainTable.Option = opt
 		lctx.mainTable.Table = e
@@ -85,7 +96,15 @@ func (q *Query[T]) ctxGetLambda() *queryContext[T] {
 }
 
 func (q *Query[T]) ctxGetProvider() provider.IProvider {
-	return q.ctx.Value(internal.CtxKeySourceProvider).(provider.IProvider)
+	return q.ctx.Value(internal.CtxKeyDBProvider).(provider.IProvider)
+}
+
+func (q *Query[T]) ctxGetTx() *sqlx.Tx {
+	tmp := q.ctx.Value(internal.CtxKeyTx)
+	if tmp == nil {
+		return nil
+	}
+	return tmp.(*sqlx.Tx)
 }
 
 func (q *Query[T]) wrap(f func(*Query[T], *queryContext[T]) statement.Type) *Query[T] {

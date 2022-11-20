@@ -1,94 +1,35 @@
 package str
 
-import (
-	"fmt"
-	"strings"
-	"sync/atomic"
+import "database/sql"
 
-	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/internal/expr/order"
-)
-
-func (q *Query[T]) build() {
-	if atomic.CompareAndSwapInt32(&q.buildCnt, 0, 1) {
-		q.Next()
-	}
-}
-
-// Values ...
-func (q *Query[T]) Values() []any {
-	q.build()
-	return q.ctxGetLambda().Values
-}
-
-// String ...
-func (q *Query[T]) String() string {
-	q.build()
-	qlCtx, provider := q.ctxGetLambda(), q.ctxGetProvider()
-	q.ctx = internal.CtxResetFilterColumnIndex(q.ctx)
-	var fieldStr string
-	if len(qlCtx.Fields) > 0 {
-		fields := provider.SelectFieldsQuote(qlCtx.Fields...)
-		fieldStr = strings.Join(fields, ",")
+// Scan 查询并返回单条记录
+func (q *Query[T]) Scan(data any) error {
+	qc := q.ctxGetLambda()
+	if tx := q.ctxGetTx(); tx == nil {
+		return qc.DB.GetContext(q.ctx, data, q.String(), q.Values()...)
 	} else {
-		fieldStr = "*"
+		return tx.GetContext(q.ctx, data, q.String(), q.Values()...)
 	}
+}
 
-	sb := strings.Builder{}
-	sb.Grow(13 + len(fieldStr))
-	sb.WriteString("SELECT ")
-	sb.WriteString(fieldStr)
-	sb.WriteString(" FROM ")
-	sb.WriteString(qlCtx.mainTable.String(q.ctx))
-
-	if len(qlCtx.joins) > 0 {
-		for _, join := range qlCtx.joins {
-			sb.WriteString(join.String(q.ctx))
-		}
+// Slice 查询并返回多行记录
+func (q *Query[T]) Slice(data any) error {
+	qc := q.ctxGetLambda()
+	if tx := q.ctxGetTx(); tx == nil {
+		return qc.DB.SelectContext(q.ctx, data, q.String(), q.Values()...)
+	} else {
+		return tx.SelectContext(q.ctx, data, q.String(), q.Values()...)
 	}
+}
 
-	if wStr := qlCtx.WhereClause.String(q.ctx); wStr != "" {
-		sb.Grow(7 + len(wStr))
-		sb.WriteString(" WHERE ")
-		sb.WriteString(wStr)
+// ScanFields 查询并返回单条记录，指定变量接收
+func (q *Query[T]) ScanFields(vals ...any) error {
+	qc := q.ctxGetLambda()
+	var row *sql.Row
+	if tx := q.ctxGetTx(); tx == nil {
+		row = qc.DB.QueryRowContext(q.ctx, q.String(), q.Values()...)
+	} else {
+		row = tx.QueryRowContext(q.ctx, q.String(), q.Values()...)
 	}
-
-	if len(qlCtx.Groups) > 0 {
-		groupFields := provider.OtherTypeFieldsQuote(qlCtx.Groups...)
-		tmp := strings.Join(groupFields, ",")
-		sb.Grow(10 + len(tmp))
-		sb.WriteString(" GROUP BY ")
-		sb.WriteString(tmp)
-	}
-
-	if hStr := qlCtx.HavingClause.String(q.ctx); hStr != "" {
-		sb.Grow(8 + len(hStr))
-		sb.WriteString(" HAVING ")
-		sb.WriteString(hStr)
-	}
-
-	if len(qlCtx.orders) > 0 {
-		orderFields := ysq.FromSlice(qlCtx.orders).
-			CastToStringBy(func(c *order.Order) string { return c.String(q.ctx) }).
-			ToSlice(len(qlCtx.orders))
-		tmp := strings.Join(orderFields, ",")
-		sb.Grow(10 + len(tmp))
-		sb.WriteString(" ORDER BY ")
-		sb.WriteString(tmp)
-	}
-
-	if qlCtx.LimitCount > 0 {
-		sb.WriteString(fmt.Sprintf(" LIMIT %d", qlCtx.LimitCount))
-	}
-
-	if qlCtx.LimitOffset > 0 {
-		sb.WriteString(fmt.Sprintf(" OFFSET %d", qlCtx.LimitOffset))
-	}
-
-	if qlCtx.HasForUpdate {
-		sb.WriteString(" FOR UPDATE")
-	}
-
-	return sb.String()
+	return row.Scan(vals...)
 }

@@ -1,14 +1,21 @@
-package pkg
+package option
+
+// ForEach 遍历
+func ForEach[TStruct any, TOption ~func(TStruct)](t TStruct, opts []TOption) {
+	for _, opt := range opts {
+		opt(t)
+	}
+}
 
 // Option 公共option
 type Option struct {
-	// Quote 包
+	// Quote 是否用引号包含
 	Quote bool
 	// Alias 别名
 	Alias string
 }
 
-// Options ...
+// Options 可选项
 type Options func(*Option)
 
 // WithQuote 引用设置

@@ -19,14 +19,14 @@ func TestAndIn(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id IN(?,?,?)", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id IN($1,$2,$3)`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
@@ -39,14 +39,14 @@ func TestOrIn(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id IN(?,?,?)", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id IN($1,$2,$3)`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
@@ -59,14 +59,14 @@ func TestAndNotIn(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id NOT IN(?)", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id NOT IN($1)`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, vals, qCtx.Values)
@@ -79,14 +79,14 @@ func TestOrNotIn(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id NOT IN(?) OR age>?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{1, 100}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id NOT IN($1) OR age>$2`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{1, 100}, qCtx.Values)
@@ -99,14 +99,14 @@ func TestAndEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id=?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id=$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -119,14 +119,14 @@ func TestOrEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id=? OR age<?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 10}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id=$1 OR age<$2`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 10}, qCtx.Values)
@@ -139,14 +139,14 @@ func TestAndNotEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id<>?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id<>$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -159,14 +159,14 @@ func TestOrNotEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id<>? OR id>?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 100}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id<>$1 OR id>$2`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 100}, qCtx.Values)
@@ -179,14 +179,14 @@ func TestAndGreater(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id>?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id>$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -199,14 +199,14 @@ func TestOrGreater(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id>? OR age<=?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 50}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id>$1 OR age<=$2`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 50}, qCtx.Values)
@@ -219,14 +219,14 @@ func TestAndGreaterOrEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id>=?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id>=$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -239,14 +239,14 @@ func TestOrGreaterOrEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id>=? OR age<?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 9}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id>=$1 OR age<$2`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 9}, qCtx.Values)
@@ -259,14 +259,14 @@ func TestAndLess(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id<?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id<$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -279,14 +279,14 @@ func TestOrLess(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id<? OR age IN(?,?)", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 10, 25}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id<$1 OR age IN($2,$3)`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val, 10, 25}, qCtx.Values)
@@ -299,14 +299,14 @@ func TestLessOrEqual(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id<=?", qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id<=$1`, qCtx.WhereClause.String(ctx))
 		assert.Equal(t, []any{val}, qCtx.Values)
@@ -318,14 +318,14 @@ func TestAndIsNull(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id IS NULL", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 0)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id IS NULL`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 0)
@@ -337,14 +337,14 @@ func TestOrIsNull(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "age=? OR id IS NULL", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `age=$1 OR id IS NULL`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
@@ -356,14 +356,14 @@ func TestAndIsNotNull(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id IS NOT NULL", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 0)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id IS NOT NULL`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 0)
@@ -375,14 +375,14 @@ func TestOrIsNotNull(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "age=? OR id IS NOT NULL", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `age=$1 OR id IS NOT NULL`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
@@ -394,14 +394,14 @@ func TestAndLike(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "name LIKE ?", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `name LIKE $1`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 1)
@@ -413,14 +413,14 @@ func TestOrLike(t *testing.T) {
 	q.build()
 	qCtx := q.ctxGetLambda()
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id>? OR name LIKE ?", qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 2)
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id>$1 OR name LIKE $2`, qCtx.WhereClause.String(ctx))
 		assert.Len(t, qCtx.Values, 2)
@@ -442,14 +442,14 @@ func TestWhere(t *testing.T) {
 	qCtx := q.ctxGetLambda()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "((id=? AND create_time>=?) AND (id>=? OR create_time<?))",
 			qCtx.WhereClause.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `((id=$1 AND create_time>=$2) AND (id>=$3 OR create_time<$4))`,
 			qCtx.WhereClause.String(ctx))
@@ -462,14 +462,14 @@ func TestAndBetween(t *testing.T) {
 	qCtx := q.ctxGetLambda()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id BETWEEN ? AND ?",
 			qCtx.WhereClause.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id BETWEEN $1 AND $2`,
 			qCtx.WhereClause.String(ctx))
@@ -482,14 +482,14 @@ func TestOrBetween(t *testing.T) {
 	qCtx := q.ctxGetLambda()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "age=? OR id BETWEEN ? AND ?",
 			qCtx.WhereClause.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `age=$1 OR id BETWEEN $2 AND $3`,
 			qCtx.WhereClause.String(ctx))
@@ -502,14 +502,14 @@ func TestNotBetween(t *testing.T) {
 	qCtx := q.ctxGetLambda()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "id NOT BETWEEN ? AND ?",
 			qCtx.WhereClause.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `id NOT BETWEEN $1 AND $2`,
 			qCtx.WhereClause.String(ctx))
@@ -522,14 +522,14 @@ func TestOrNotBetween(t *testing.T) {
 	qCtx := q.ctxGetLambda()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, "age=? OR id NOT BETWEEN ? AND ?",
 			qCtx.WhereClause.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		assert.Equal(t, `age=$1 OR id NOT BETWEEN $2 AND $3`,
 			qCtx.WhereClause.String(ctx))

@@ -23,7 +23,7 @@ func TestAnd(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	ctx := context.TODO()
-	ctx = context.WithValue(ctx, internal.CtxKeySourceProvider, &mysql.Provider{})
+	ctx = context.WithValue(ctx, internal.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		cond := All().

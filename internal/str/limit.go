@@ -2,7 +2,7 @@ package str
 
 import "github.com/yeungsean/ysq-db/internal/expr/statement"
 
-// Limit ...
+// Limit 限制数
 func (q *Query[T]) Limit(limit int) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {
@@ -12,7 +12,7 @@ func (q *Query[T]) Limit(limit int) *Query[T] {
 	)
 }
 
-// Offset ...
+// Offset 偏移数
 func (q *Query[T]) Offset(offset int) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {
@@ -22,7 +22,7 @@ func (q *Query[T]) Offset(offset int) *Query[T] {
 	)
 }
 
-// LimitOffset ...
+// LimitOffset 限制数 + 偏移数
 func (q *Query[T]) LimitOffset(limit, offset int) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {

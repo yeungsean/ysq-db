@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/pkg/field"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 // Type 排序类型
@@ -27,27 +27,27 @@ type Order struct {
 
 // String ...
 func (o Order) String(ctx context.Context) string {
-	provider := internal.CtxGetSourceProvider(ctx)
+	provider := internal.CtxGetDBProvider(ctx)
 	if o.Type == "" {
 		o.Type = Asc
 	}
-	return fmt.Sprintf(`%s %s`, provider.OtherTypeFieldQuote(&o.Field), o.Type)
+	return fmt.Sprintf(`%s %s`, provider.OtherTypeField(&o.Field), o.Type)
 }
 
-// Option 可选参数
-type Option func(*Order)
+// Options 可选参数
+type Options func(*Order)
 
 // WithAlias ...
-func WithAlias(alias string) Option {
+func WithAlias(alias string) Options {
 	return func(o *Order) {
 		o.Alias = alias
 	}
 }
 
 // NewOrder ...
-func NewOrder(name field.Type, orderType Type, opts ...Option) *Order {
+func NewOrder(name field.Type, orderType Type, opts ...Options) *Order {
 	o := &Order{Type: orderType}
 	o.Name = name
-	common.OptionForEach(o, opts)
+	option.ForEach(o, opts)
 	return o
 }

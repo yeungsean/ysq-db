@@ -21,7 +21,7 @@ func TestGroupBy(t *testing.T) {
 }
 
 func TestHavingOrMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		q := NewQuery(`user`).HavingOr("gender", 1)
@@ -40,7 +40,7 @@ func TestHavingOrMySQL(t *testing.T) {
 }
 
 func TestHavingAndMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		q := NewQuery(`user`).HavingOr("gender", 1)
@@ -59,7 +59,7 @@ func TestHavingAndMySQL(t *testing.T) {
 }
 
 func TestHavingOrPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		q := NewQuery(`user`).HavingOr("gender", 1)
@@ -78,7 +78,7 @@ func TestHavingOrPostgreSQL(t *testing.T) {
 }
 
 func TestHavingAndPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeySourceProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
 		ctx = internal.CtxResetFilterColumnIndex(ctx)
 		q := NewQuery(`user`).HavingOr("gender", 1)

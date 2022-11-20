@@ -7,9 +7,9 @@ import (
 
 	"github.com/yeungsean/ysq"
 	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
 	"github.com/yeungsean/ysq-db/pkg/field"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 // Column 筛选列
@@ -67,7 +67,7 @@ func New(name field.Type, options ...Option) *Column {
 		op: ops.EQ,
 	}
 	column.Name = name
-	common.OptionForEach(column, options)
+	option.ForEach(column, options)
 	if column.Prefix != "" {
 		return column
 	}
@@ -83,8 +83,8 @@ func New(name field.Type, options ...Option) *Column {
 // String ...
 func (c Column) String(ctx context.Context) string {
 	idx := ctx.Value(internal.CtxKeyFilterColumnIndex).(*int)
-	provider := internal.CtxGetSourceProvider(ctx)
-	name := provider.OtherTypeFieldQuote(&c.Field)
+	provider := internal.CtxGetDBProvider(ctx)
+	name := provider.OtherTypeField(&c.Field)
 	switch c.op {
 	case ops.IsNull, ops.IsNotNull:
 		return fmt.Sprintf(`%s %s`, name, c.op)
@@ -107,7 +107,7 @@ func (c Column) String(ctx context.Context) string {
 		return fmt.Sprintf(`%s %s(%s)`, name, c.op, strings.Join(strs, ","))
 	default:
 		if tmp, ok := c.value.(*Column); ok {
-			tmpName := provider.OtherTypeFieldQuote(&tmp.Field)
+			tmpName := provider.OtherTypeField(&tmp.Field)
 			return fmt.Sprintf("%s%s%s", name, c.op, tmpName)
 		}
 		res := fmt.Sprintf("%s%s%s", name, c.op, provider.PlaceHolder(*idx))
@@ -156,6 +156,11 @@ func (c *Column) LessEqual(value any) *Column {
 // Like ...
 func (c *Column) Like(value any) *Column {
 	return c.Set(value, ops.Like)
+}
+
+// NotLike ...
+func (c *Column) NotLike(value any) *Column {
+	return c.Set(value, ops.NotLike)
 }
 
 // IsNull 是否为空

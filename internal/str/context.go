@@ -1,6 +1,7 @@
 package str
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/yeungsean/ysq-db/internal/expr/cond"
 	"github.com/yeungsean/ysq-db/internal/expr/join"
 	"github.com/yeungsean/ysq-db/internal/expr/order"
@@ -21,6 +22,9 @@ type queryContext[T string] struct {
 	LimitOffset int
 	LimitCount  int
 	Values      []any
+
+	DB *sqlx.DB
+	Tx *sqlx.Tx
 }
 
 func newQueryContext[T string]() *queryContext[T] {

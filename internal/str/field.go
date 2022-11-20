@@ -2,9 +2,9 @@ package str
 
 import (
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal/expr/common"
 	"github.com/yeungsean/ysq-db/internal/expr/statement"
 	"github.com/yeungsean/ysq-db/pkg/field"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 // Select ...
@@ -44,7 +44,7 @@ func (q *Query[T]) Field(fieldName string, opts ...field.Options) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {
 			f := field.New(field.Type(fieldName))
-			common.OptionForEach(&f.Option, opts)
+			option.ForEach(&f.Option, opts)
 			if f.DefaultValue != nil && f.Alias == "" {
 				f.Alias = string(f.Name)
 			}

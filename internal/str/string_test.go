@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/yeungsean/ysq-db/internal/expr/column"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
-	"github.com/yeungsean/ysq-db/pkg"
 	"github.com/yeungsean/ysq-db/pkg/field"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 func TestQueryStringFields(t *testing.T) {
@@ -51,7 +51,7 @@ func TestQueryStringFields(t *testing.T) {
 }
 
 func TestQueryLazyLoad(t *testing.T) {
-	q1 := NewQuery("user").As("u").InnerJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud"))
+	q1 := NewQuery("user").As("u").InnerJoin("user_detail", "u.id=ud.id", option.WithAlias("ud"))
 	q2 := q1.SelectPrefix("u", "id", "name")
 	assert.Equal(t, "SELECT * FROM user AS u INNER JOIN user_detail AS ud ON u.id=ud.id", q1.String())
 	assert.Equal(t, "SELECT u.id,u.name FROM user AS u INNER JOIN user_detail AS ud ON u.id=ud.id", q2.String())
@@ -62,19 +62,19 @@ func TestQueryLazyLoad(t *testing.T) {
 
 func TestQueryStringJoin(t *testing.T) {
 	func() {
-		q := NewQuery("user").As("u").LeftJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud"))
+		q := NewQuery("user").As("u").LeftJoin("user_detail", "u.id=ud.id", option.WithAlias("ud"))
 		str := q.String()
 		assert.Equal(t, "SELECT * FROM user AS u LEFT JOIN user_detail AS ud ON u.id=ud.id", str)
 	}()
 
 	func() {
-		q := NewQuery("user").As("u").InnerJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud"))
+		q := NewQuery("user").As("u").InnerJoin("user_detail", "u.id=ud.id", option.WithAlias("ud"))
 		str := q.String()
 		assert.Equal(t, "SELECT * FROM user AS u INNER JOIN user_detail AS ud ON u.id=ud.id", str)
 	}()
 
 	func() {
-		q := NewQuery("user").As("u").RightJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud"))
+		q := NewQuery("user").As("u").RightJoin("user_detail", "u.id=ud.id", option.WithAlias("ud"))
 		str := q.String()
 		assert.Equal(t, "SELECT * FROM user AS u RIGHT JOIN user_detail AS ud ON u.id=ud.id", str)
 	}()
@@ -88,7 +88,7 @@ func TestQueryStringJoin(t *testing.T) {
 	func() {
 		q := NewQuery("user").As("u").
 			SelectPrefix("u", "id", "name").
-			InnerJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud")).
+			InnerJoin("user_detail", "u.id=ud.id", option.WithAlias("ud")).
 			SelectPrefix("ud", "addr").
 			Field("age", field.WithDefaultValue(0))
 		str := q.String()
@@ -101,7 +101,7 @@ func TestQueryStringJoin(t *testing.T) {
 func TestQueryStringWhere(t *testing.T) {
 	func() {
 		q := NewQuery("user").As("u").
-			LeftJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud")).
+			LeftJoin("user_detail", "u.id=ud.id", option.WithAlias("ud")).
 			AndEqual("u.id", 1)
 		str := q.String()
 		assert.Equal(t,
@@ -111,7 +111,7 @@ func TestQueryStringWhere(t *testing.T) {
 	}()
 
 	func() {
-		baseQ := NewQuery(`user`).As(`u`).LeftJoin("user_detail", "u.id=ud.id", pkg.WithAlias("ud")).AndEqual("u.id", 1)
+		baseQ := NewQuery(`user`).As(`u`).LeftJoin("user_detail", "u.id=ud.id", option.WithAlias("ud")).AndEqual("u.id", 1)
 		q1 := baseQ.AndGreaterOrEqual("ud.age", 10)
 		q2 := baseQ.AndLess("ud.age", 10).AndIsNotNull("ud.addr")
 		q3 := baseQ.AndBetween("ud.age", 1, 10)
@@ -147,7 +147,7 @@ func TestQueryStringWhere(t *testing.T) {
 func TestQueryGroups(t *testing.T) {
 	func() {
 		q1 := NewQuery(`user`).As(`u`).GroupBy("age").Select("age").Count(field.Option{
-			Option: pkg.Option{Alias: "cnt"},
+			Option: option.Option{Alias: "cnt"},
 		})
 		assert.Equal(t,
 			"SELECT age,COUNT(1) AS cnt FROM user AS u GROUP BY age",
@@ -156,7 +156,7 @@ func TestQueryGroups(t *testing.T) {
 
 	func() {
 		q1 := NewQuery(`user`).As(`u`).GroupBy("age").Count(field.Option{
-			Option: pkg.Option{Alias: "cnt"},
+			Option: option.Option{Alias: "cnt"},
 		})
 		assert.Equal(t,
 			"SELECT COUNT(1) AS cnt FROM user AS u GROUP BY age",
@@ -191,7 +191,7 @@ func TestQueryGroups(t *testing.T) {
 			q1.String())
 
 		q2 := NewQuery(`user`).As(`u`).GroupBy("age").Sum("age", field.Option{
-			Option: pkg.Option{
+			Option: option.Option{
 				Quote: true,
 			},
 		})
@@ -216,7 +216,7 @@ func TestQueryGroupByHaving(t *testing.T) {
 
 func TestQueryQuote(t *testing.T) {
 	func() {
-		q := NewQuery().Entity("user", pkg.WithQuote()).
+		q := NewQuery().Entity("user", option.WithQuote()).
 			AndEqual("gender", "male", column.WithQuote()).
 			AndGreater("id", 10).
 			LimitOffset(10, 0).
@@ -230,7 +230,7 @@ func TestQueryQuote(t *testing.T) {
 
 	func() {
 		q := NewQuery("user").As("u").
-			LeftJoin("user_role", "u.id=ur.user_id", pkg.WithAlias("ur")).
+			LeftJoin("user_role", "u.id=ur.user_id", option.WithAlias("ur")).
 			AndGreaterOrEqual("u.id", 100).
 			SelectPrefix("u", "id", "name", "age").
 			Select("ur.role_id").

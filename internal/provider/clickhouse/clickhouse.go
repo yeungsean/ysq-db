@@ -16,18 +16,13 @@ func (m Provider) PlaceHolder(int) string {
 	return "?"
 }
 
-// DefaultValue 默认值
-func (m Provider) DefaultValue(field, value string) string {
-	return fmt.Sprintf(`IFNULL(%s,%s)`, field, value)
+// SelectFields 包起来
+func (m Provider) SelectFields(fields ...*field.Field) []string {
+	return ysq.FromSlice(fields).CastToStringBy(m.SelectField).ToSlice(len(fields))
 }
 
-// SelectFieldsQuote 包起来
-func (m Provider) SelectFieldsQuote(fields ...*field.Field) []string {
-	return ysq.FromSlice(fields).CastToStringBy(m.SelectFieldQuote).ToSlice(len(fields))
-}
-
-// SelectFieldQuote 包起来
-func (m Provider) SelectFieldQuote(field *field.Field) string {
+// SelectField 包起来
+func (m Provider) SelectField(field *field.Field) string {
 	c := provider.SelectFieldQuote(field, "`%s`")
 	if field.DefaultValue != nil {
 		c = fmt.Sprintf("IFNULL(%s,%v)", c, field.DefaultValue)
@@ -39,20 +34,16 @@ func (m Provider) SelectFieldQuote(field *field.Field) string {
 	return c
 }
 
-// OtherTypeFieldsQuote ...
-func (m Provider) OtherTypeFieldsQuote(fields ...*field.Field) []string {
-	return ysq.FromSlice(fields).CastToStringBy(m.OtherTypeFieldQuote).ToSlice(len(fields))
+// OtherTypeFields ...
+func (m Provider) OtherTypeFields(fields ...*field.Field) []string {
+	return ysq.FromSlice(fields).CastToStringBy(m.OtherTypeField).ToSlice(len(fields))
 }
 
-// OtherTypeFieldQuote ...
-func (m Provider) OtherTypeFieldQuote(field *field.Field) string {
-	if field.Alias != "" {
-		return field.Alias
-	} else if field.Prefix != "" {
-		return fmt.Sprintf("%s.%s", field.Prefix, field.Name)
-	} else {
-		return m.Quote(string(field.Name))
-	}
+// OtherTypeField ...
+func (m Provider) OtherTypeField(f *field.Field) string {
+	return provider.OtherTypeField(f, func(f *field.Field) string {
+		return m.Quote(string(f.Name))
+	})
 }
 
 // Quote ...

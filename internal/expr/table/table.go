@@ -5,20 +5,20 @@ import (
 	"fmt"
 
 	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/pkg"
+	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
-// Expr ...
+// Expr table表达式
 type Expr[T string] struct {
 	Table T
-	pkg.Option
+	option.Option
 }
 
 // String ...
 func (t Expr[T]) String(ctx context.Context) string {
 	var tb string
 	if t.Quote {
-		provider := internal.CtxGetSourceProvider(ctx)
+		provider := internal.CtxGetDBProvider(ctx)
 		tb = provider.Quote(string(t.Table))
 	} else {
 		tb = string(t.Table)
