@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yeungsean/ysq-db/internal"
+	provider "github.com/yeungsean/ysq-db/pkg/dbprovider"
 	"github.com/yeungsean/ysq-db/pkg/field"
 	"github.com/yeungsean/ysq-db/pkg/option"
 )
@@ -27,7 +27,7 @@ type Order struct {
 
 // String ...
 func (o Order) String(ctx context.Context) string {
-	provider := internal.CtxGetDBProvider(ctx)
+	provider := provider.CtxGet(ctx)
 	if o.Type == "" {
 		o.Type = Asc
 	}

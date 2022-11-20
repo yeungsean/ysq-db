@@ -7,7 +7,7 @@ import (
 	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
-// Select ...
+// Select 查询字段
 func (q *Query[T]) Select(fields ...string) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {
@@ -21,7 +21,7 @@ func (q *Query[T]) Select(fields ...string) *Query[T] {
 		})
 }
 
-// SelectPrefix ...
+// SelectPrefix 查询字段，统一前缀
 func (q *Query[T]) SelectPrefix(prefix string, fields ...string) *Query[T] {
 	return q.wrap(func(q *Query[T], qc *queryContext[T]) statement.Type {
 		res := ysq.Select(
@@ -39,7 +39,7 @@ func (q *Query[T]) SelectPrefix(prefix string, fields ...string) *Query[T] {
 	})
 }
 
-// Field ...
+// Field 字段
 func (q *Query[T]) Field(fieldName string, opts ...field.Options) *Query[T] {
 	return q.wrap(
 		func(q *Query[T], qc *queryContext[T]) statement.Type {

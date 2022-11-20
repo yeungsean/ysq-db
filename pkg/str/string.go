@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal"
 	"github.com/yeungsean/ysq-db/internal/expr/order"
+	"github.com/yeungsean/ysq-db/pkg"
 )
 
 func (q *Query[T]) build() {
@@ -16,17 +16,17 @@ func (q *Query[T]) build() {
 	}
 }
 
-// Values ...
-func (q *Query[T]) Values() []any {
+// Args sql语句需要的所有参数
+func (q *Query[T]) Args() []any {
 	q.build()
-	return q.ctxGetLambda().Values
+	return q.ctxGetLambda().Args
 }
 
-// String ...
+// String 获取sql语句
 func (q *Query[T]) String() string {
 	q.build()
 	qlCtx, provider := q.ctxGetLambda(), q.ctxGetProvider()
-	q.ctx = internal.CtxResetFilterColumnIndex(q.ctx)
+	q.ctx = pkg.CtxResetFilterColumnIndex(q.ctx)
 	var fieldStr string
 	if len(qlCtx.Fields) > 0 {
 		fields := provider.SelectFields(qlCtx.Fields...)

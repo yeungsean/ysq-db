@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yeungsean/ysq-db/internal"
 	"github.com/yeungsean/ysq-db/internal/expr/column"
-	"github.com/yeungsean/ysq-db/internal/provider/mysql"
+	"github.com/yeungsean/ysq-db/pkg"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/mysql"
 )
 
 func TestOr(t *testing.T) {
@@ -23,9 +23,9 @@ func TestAnd(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	ctx := context.TODO()
-	ctx = context.WithValue(ctx, internal.CtxKeyDBProvider, &mysql.Provider{})
+	ctx = context.WithValue(ctx, pkg.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
-		ctx = internal.CtxResetFilterColumnIndex(ctx)
+		ctx = pkg.CtxResetFilterColumnIndex(ctx)
 		cond := All().
 			Add(column.New("column1")).
 			Add(column.New("column2"))
@@ -33,7 +33,7 @@ func TestAdd(t *testing.T) {
 	}()
 
 	func() {
-		ctx = internal.CtxResetFilterColumnIndex(ctx)
+		ctx = pkg.CtxResetFilterColumnIndex(ctx)
 		cond := Any().
 			Add(column.New("column1")).
 			Add(column.New("column2"))
@@ -41,7 +41,7 @@ func TestAdd(t *testing.T) {
 	}()
 
 	func() {
-		ctx = internal.CtxResetFilterColumnIndex(ctx)
+		ctx = pkg.CtxResetFilterColumnIndex(ctx)
 		condOr := Any().
 			Add(column.New("or_col1").GreaterEqual(1)).
 			Add(column.New("or_col2").LessEqual(2))

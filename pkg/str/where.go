@@ -18,12 +18,12 @@ func (q *Query[T]) wrapStatementWhere(ft field.Type, op ops.Type, value any, lt 
 		}
 		switch v := value.(type) {
 		case []any:
-			qc.Values = append(qc.Values, v...)
+			qc.Args = append(qc.Args, v...)
 		case *column.Column:
 		case *Query[T]:
 			panic("Unsupport")
 		default:
-			qc.Values = append(qc.Values, value)
+			qc.Args = append(qc.Args, value)
 		}
 		return statement.Where
 	})

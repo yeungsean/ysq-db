@@ -5,22 +5,22 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yeungsean/ysq-db/internal"
-	"github.com/yeungsean/ysq-db/internal/provider/mysql"
-	"github.com/yeungsean/ysq-db/internal/provider/postgresql"
+	"github.com/yeungsean/ysq-db/pkg"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/mysql"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/postgresql"
 )
 
 func TestOrderAscMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
-		q := NewQuery().Entity("user").OrderAsc("id")
+		q := NewQuery(context.TODO()).Entity("user").OrderAsc("id")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 1)
 		assert.Equal(t, "id ASC", q.ctxGetLambda().orders[0].String(ctx))
 	}()
 
 	func() {
-		q := NewQuery().Entity("user").OrderAsc("id").OrderDesc("create_time")
+		q := NewQuery(context.TODO()).Entity("user").OrderAsc("id").OrderDesc("create_time")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 2)
 		assert.Equal(t, "id ASC", q.ctxGetLambda().orders[0].String(ctx))
@@ -29,16 +29,16 @@ func TestOrderAscMySQL(t *testing.T) {
 }
 
 func TestOrderDescMySQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &mysql.Provider{})
 	func() {
-		q := NewQuery().Entity("user").OrderDesc("id")
+		q := NewQuery(context.TODO()).Entity("user").OrderDesc("id")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 1)
 		assert.Equal(t, "id DESC", q.ctxGetLambda().orders[0].String(ctx))
 	}()
 
 	func() {
-		q := NewQuery().Entity("user").OrderDesc("id").OrderAsc("create_time")
+		q := NewQuery(context.TODO()).Entity("user").OrderDesc("id").OrderAsc("create_time")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 2)
 		assert.Equal(t, "id DESC", q.ctxGetLambda().orders[0].String(ctx))
@@ -47,16 +47,16 @@ func TestOrderDescMySQL(t *testing.T) {
 }
 
 func TestOrderAscPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
-		q := NewQuery().Entity("user").OrderAsc("id")
+		q := NewQuery(context.TODO()).Entity("user").OrderAsc("id")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 1)
 		assert.Equal(t, `id ASC`, q.ctxGetLambda().orders[0].String(ctx))
 	}()
 
 	func() {
-		q := NewQuery().Entity("user").OrderAsc("id").OrderDesc("create_time")
+		q := NewQuery(context.TODO()).Entity("user").OrderAsc("id").OrderDesc("create_time")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 2)
 		assert.Equal(t, `id ASC`, q.ctxGetLambda().orders[0].String(ctx))
@@ -65,16 +65,16 @@ func TestOrderAscPostgreSQL(t *testing.T) {
 }
 
 func TestOrderDescPostgreSQL(t *testing.T) {
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &postgresql.Provider{})
 	func() {
-		q := NewQuery().Entity("user").OrderDesc("id")
+		q := NewQuery(context.TODO()).Entity("user").OrderDesc("id")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 1)
 		assert.Equal(t, `id DESC`, q.ctxGetLambda().orders[0].String(ctx))
 	}()
 
 	func() {
-		q := NewQuery().Entity("user").OrderDesc("id").OrderAsc("create_time")
+		q := NewQuery(context.TODO()).Entity("user").OrderDesc("id").OrderAsc("create_time")
 		q.build()
 		assert.Len(t, q.ctxGetLambda().orders, 2)
 		assert.Equal(t, `id DESC`, q.ctxGetLambda().orders[0].String(ctx))

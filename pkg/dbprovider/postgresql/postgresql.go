@@ -1,19 +1,26 @@
-package clickhouse
+package postgresql
 
 import (
 	"fmt"
 
 	"github.com/yeungsean/ysq"
-	"github.com/yeungsean/ysq-db/internal/provider"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider"
 	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
-// Provider clickhouse
+const quote = `"%s"`
+
+// Provider postgresql
 type Provider struct{}
 
 // PlaceHolder 占位符
-func (m Provider) PlaceHolder(int) string {
-	return "?"
+func (m Provider) PlaceHolder(i int) string {
+	return fmt.Sprintf("$%d", i)
+}
+
+// Type 数据库类型
+func (m Provider) Type() string {
+	return "postgresql"
 }
 
 // SelectFields 包起来
@@ -22,10 +29,10 @@ func (m Provider) SelectFields(fields ...*field.Field) []string {
 }
 
 // SelectField 包起来
-func (m Provider) SelectField(field *field.Field) string {
-	c := provider.SelectFieldQuote(field, "`%s`")
+func (m Provider) SelectField(field *field.Field) (c string) {
+	c = dbprovider.SelectFieldQuote(field, quote)
 	if field.DefaultValue != nil {
-		c = fmt.Sprintf("IFNULL(%s,%v)", c, field.DefaultValue)
+		c = fmt.Sprintf("COALESCE(%s,%v)", c, field.DefaultValue)
 	}
 
 	if field.Alias != "" {
@@ -40,13 +47,13 @@ func (m Provider) OtherTypeFields(fields ...*field.Field) []string {
 }
 
 // OtherTypeField ...
-func (m Provider) OtherTypeField(f *field.Field) string {
-	return provider.OtherTypeField(f, func(f *field.Field) string {
+func (m Provider) OtherTypeField(f *field.Field) (c string) {
+	return dbprovider.OtherTypeField(f, func(f *field.Field) string {
 		return m.Quote(string(f.Name))
 	})
 }
 
 // Quote ...
 func (m Provider) Quote(str string) string {
-	return fmt.Sprintf("`%s`", str)
+	return fmt.Sprintf(quote, str)
 }

@@ -1,16 +1,19 @@
 package str
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/mysql"
 	"github.com/yeungsean/ysq-db/pkg/field"
 	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
 func TestSum(t *testing.T) {
+	baseQ := NewQuery(context.TODO(), &mysql.Provider{}).Entity("user")
 	func() {
-		q := NewQuery(`user`).As(`u`).Sum("age", field.Option{DefaultValue: "0"})
+		q := baseQ.As(`u`).Sum("age", field.Option{DefaultValue: "0"})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -18,7 +21,7 @@ func TestSum(t *testing.T) {
 	}()
 
 	func() {
-		q := NewQuery(`user`).Sum("age", field.Option{})
+		q := baseQ.Sum("age", field.Option{})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -27,8 +30,9 @@ func TestSum(t *testing.T) {
 }
 
 func TestAvg(t *testing.T) {
+	baseQ := NewQuery(context.TODO(), &mysql.Provider{}).Entity("user")
 	func() {
-		q := NewQuery(`user`).Avg("age", field.Option{
+		q := baseQ.Avg("age", field.Option{
 			DefaultValue: "0",
 			Option: option.Option{
 				Alias: "AvgAge",
@@ -41,7 +45,7 @@ func TestAvg(t *testing.T) {
 	}()
 
 	func() {
-		q := NewQuery(`user`).Avg("age", field.Option{})
+		q := baseQ.Avg("age", field.Option{})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -50,8 +54,9 @@ func TestAvg(t *testing.T) {
 }
 
 func TestMax(t *testing.T) {
+	baseQ := NewQuery(context.TODO(), &mysql.Provider{}).Entity("user")
 	func() {
-		q := NewQuery(`user`).Max("age", field.Option{DefaultValue: "0"})
+		q := baseQ.Max("age", field.Option{DefaultValue: "0"})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -59,7 +64,7 @@ func TestMax(t *testing.T) {
 	}()
 
 	func() {
-		q := NewQuery(`user`).Max("age", field.Option{})
+		q := baseQ.Max("age", field.Option{})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -68,8 +73,9 @@ func TestMax(t *testing.T) {
 }
 
 func TestMin(t *testing.T) {
+	baseQ := NewQuery(context.TODO(), &mysql.Provider{}).Entity("user")
 	func() {
-		q := NewQuery(`user`).Min("age", field.Option{DefaultValue: "0"})
+		q := baseQ.Min("age", field.Option{DefaultValue: "0"})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -77,7 +83,7 @@ func TestMin(t *testing.T) {
 	}()
 
 	func() {
-		q := NewQuery(`user`).Min("age", field.Option{})
+		q := baseQ.Min("age", field.Option{})
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)
@@ -86,8 +92,9 @@ func TestMin(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
+	baseQ := NewQuery(context.TODO(), &mysql.Provider{}).Entity("user")
 	func() {
-		q := NewQuery(`user`).Count(field.Option{
+		q := baseQ.Count(field.Option{
 			Option: option.Option{Alias: "cnt"},
 		})
 		q.build()
@@ -97,7 +104,7 @@ func TestCount(t *testing.T) {
 	}()
 
 	func() {
-		q := NewQuery(`user`).Count()
+		q := baseQ.Count()
 		q.build()
 		qCtx := q.ctxGetLambda()
 		assert.Len(t, qCtx.Fields, 1)

@@ -1,10 +1,6 @@
-package internal
+package pkg
 
-import (
-	"context"
-
-	"github.com/yeungsean/ysq-db/internal/provider"
-)
+import "context"
 
 // CtxKey key定义
 type CtxKey uint8
@@ -20,12 +16,9 @@ const (
 	CtxKeyCacheProvider
 	// CtxKeyTx 事务
 	CtxKeyTx
+	// CtxKeyDB db实例
+	CtxKeyDB
 )
-
-// CtxGetDBProvider 获取数据源provider
-func CtxGetDBProvider(ctx context.Context) provider.IProvider {
-	return ctx.Value(CtxKeyDBProvider).(provider.IProvider)
-}
 
 // CtxResetFilterColumnIndex 获取过滤条件的列编号
 func CtxResetFilterColumnIndex(ctx context.Context) context.Context {

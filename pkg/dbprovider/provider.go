@@ -1,13 +1,15 @@
-package provider
+package dbprovider
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/yeungsean/ysq-db/pkg"
 	"github.com/yeungsean/ysq-db/pkg/field"
 )
 
-// IProvider ...
-type IProvider interface {
+// IDBProvider ...
+type IDBProvider interface {
 	// PlaceHolder 占位符
 	PlaceHolder(int) string
 	// Quote ...
@@ -20,6 +22,8 @@ type IProvider interface {
 	OtherTypeFields(...*field.Field) []string
 	// OtherTypeField ...
 	OtherTypeField(*field.Field) string
+	// Type 数据库类型
+	Type() string
 }
 
 // SelectFieldQuote ...
@@ -66,4 +70,9 @@ func OtherTypeField(field *field.Field, quoteFn func(*field.Field) string) (c st
 	default:
 		return string(field.Name)
 	}
+}
+
+// CtxGet 获取数据源provider
+func CtxGet(ctx context.Context) IDBProvider {
+	return ctx.Value(pkg.CtxKeyDBProvider).(IDBProvider)
 }

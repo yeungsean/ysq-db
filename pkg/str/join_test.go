@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yeungsean/ysq-db/internal"
 	"github.com/yeungsean/ysq-db/internal/expr/join"
 	"github.com/yeungsean/ysq-db/internal/expr/table"
-	"github.com/yeungsean/ysq-db/internal/provider/mysql"
-	"github.com/yeungsean/ysq-db/internal/provider/postgresql"
+	"github.com/yeungsean/ysq-db/pkg"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/mysql"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider/postgresql"
 	"github.com/yeungsean/ysq-db/pkg/option"
 )
 
@@ -24,14 +24,14 @@ func TestLeftjoinExprString(t *testing.T) {
 	}
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
+		ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &mysql.Provider{})
 		assert.Equal(t,
 			" LEFT JOIN user_detail AS ud ON u.id = ud.user_id",
 			je.String(ctx))
 	}()
 
 	func() {
-		ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &postgresql.Provider{})
+		ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &postgresql.Provider{})
 		assert.Equal(t,
 			` LEFT JOIN user_detail AS ud ON u.id = ud.user_id`,
 			je.String(ctx))
@@ -48,7 +48,7 @@ func TestRightjoinExprString(t *testing.T) {
 		Condition: "u.id = ud.user_id",
 	}
 
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &mysql.Provider{})
 	assert.Equal(t,
 		" RIGHT JOIN user_detail AS ud ON u.id = ud.user_id",
 		je.String(ctx))
@@ -63,14 +63,14 @@ func TestInnerjoinExprString(t *testing.T) {
 		Condition: "u.id = user_id",
 	}
 
-	ctx := context.WithValue(context.TODO(), internal.CtxKeyDBProvider, &mysql.Provider{})
+	ctx := context.WithValue(context.TODO(), pkg.CtxKeyDBProvider, &mysql.Provider{})
 	assert.Equal(t,
 		" INNER JOIN user_detail ON u.id = user_id",
 		je.String(ctx))
 }
 
 func TestLeftJoin(t *testing.T) {
-	q := NewQuery().Entity("user", option.WithAlias("u")).
+	q := NewQuery(context.TODO()).Entity("user", option.WithAlias("u")).
 		LeftJoin("user_detail", "u.id = ud.user_id", option.WithAlias("ud"))
 	q.build()
 	js := q.ctxGetLambda().joins
@@ -78,7 +78,7 @@ func TestLeftJoin(t *testing.T) {
 }
 
 func TestRightJoin(t *testing.T) {
-	q := NewQuery().Entity("user", option.WithAlias("u")).
+	q := NewQuery(context.TODO()).Entity("user", option.WithAlias("u")).
 		RightJoin("user_detail", "u.id = ud.user_id", option.WithAlias("ud"))
 	q.build()
 	js := q.ctxGetLambda().joins
@@ -86,7 +86,7 @@ func TestRightJoin(t *testing.T) {
 }
 
 func TestInnerJoin(t *testing.T) {
-	q := NewQuery().Entity("user", option.WithAlias("u")).
+	q := NewQuery(context.TODO()).Entity("user", option.WithAlias("u")).
 		InnerJoin("user_detail", "u.id = ud.user_id", option.WithAlias("ud"))
 	q.build()
 	js := q.ctxGetLambda().joins
