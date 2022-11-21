@@ -37,22 +37,22 @@ func (q *Query[T]) wrapStatementWhereOr(f field.Type, op ops.Type, value any, op
 	return q.wrapStatementWhere(f, op, value, cond.Or, opts...)
 }
 
-// AndIn ...
+// AndIn AND IN
 func (q *Query[T]) AndIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
 	return q.wrapStatementWhereAnd(f, ops.In, value, opts...)
 }
 
-// OrIn ...
+// OrIn OR IN
 func (q *Query[T]) OrIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
 	return q.wrapStatementWhereOr(f, ops.In, value, opts...)
 }
 
-// AndNotIn ...
+// AndNotIn AND NOT IN
 func (q *Query[T]) AndNotIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
 	return q.wrapStatementWhereAnd(f, ops.NotIn, value, opts...)
 }
 
-// OrNotIn ...
+// OrNotIn OR NOT IN
 func (q *Query[T]) OrNotIn(f field.Type, value []any, opts ...column.Option) *Query[T] {
 	return q.wrapStatementWhereOr(f, ops.NotIn, value, opts...)
 }

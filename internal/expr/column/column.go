@@ -8,7 +8,7 @@ import (
 	"github.com/yeungsean/ysq"
 	"github.com/yeungsean/ysq-db/internal/expr/ops"
 	"github.com/yeungsean/ysq-db/pkg"
-	provider "github.com/yeungsean/ysq-db/pkg/dbprovider"
+	"github.com/yeungsean/ysq-db/pkg/dbprovider"
 	"github.com/yeungsean/ysq-db/pkg/field"
 	"github.com/yeungsean/ysq-db/pkg/option"
 )
@@ -84,7 +84,7 @@ func New(name field.Type, options ...Option) *Column {
 // String ...
 func (c Column) String(ctx context.Context) string {
 	idx := ctx.Value(pkg.CtxKeyFilterColumnIndex).(*int)
-	provider := provider.CtxGet(ctx)
+	provider := dbprovider.CtxGet(ctx)
 	name := provider.OtherTypeField(&c.Field)
 	switch c.op {
 	case ops.IsNull, ops.IsNotNull:
