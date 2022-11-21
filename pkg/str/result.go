@@ -1,6 +1,6 @@
 package str
 
-import "database/sql"
+import "github.com/jmoiron/sqlx"
 
 // Scan 查询并返回单条记录
 func (q *Query[T]) Scan(data any) error {
@@ -21,11 +21,11 @@ func (q *Query[T]) Slice(data any) error {
 
 // ScanFields 查询并返回单条记录，指定变量接收
 func (q *Query[T]) ScanFields(vals ...any) error {
-	var row *sql.Row
+	var row *sqlx.Row
 	if tx := q.ctxGetTx(); tx != nil {
-		row = tx.QueryRowContext(q.ctx, q.String(), q.Args()...)
+		row = tx.QueryRowxContext(q.ctx, q.String(), q.Args()...)
 	} else {
-		row = q.ctxGetDB().QueryRowContext(q.ctx, q.String(), q.Args()...)
+		row = q.ctxGetDB().QueryRowxContext(q.ctx, q.String(), q.Args()...)
 	}
 	return row.Scan(vals...)
 }

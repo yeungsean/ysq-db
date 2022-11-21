@@ -9,6 +9,12 @@ import (
 	"github.com/yeungsean/ysq-db/pkg/dbprovider/mysql"
 )
 
+func TestContext(t *testing.T) {
+	q := NewQuery(context.TODO()).Context(context.WithValue(context.TODO(), "tmp", 1))
+	assert.NotNil(t, q.ctx)
+	assert.Equal(t, 1, q.ctx.Value("tmp"))
+}
+
 func TestCtxGetTx(t *testing.T) {
 	q := NewQuery(context.TODO()).WithDBProvider(&mysql.Provider{})
 	func() {
